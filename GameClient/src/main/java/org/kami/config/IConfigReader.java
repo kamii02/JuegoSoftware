@@ -1,6 +1,7 @@
 package org.kami.config;
 
 /**
+ * Lee el .properties
  * Interfaz que define el contrato para la lectura de configuraciones
  * de la aplicación.
  *
@@ -23,20 +24,8 @@ package org.kami.config;
  * @since 1.0
  */
 public interface IConfigReader {
-    /**
-     * Obtiene el puerto en el que el servidor debe iniciar.
-     *
-     * @return el número de puerto configurado.
-     */
-    int getPort();
-
-    /**
-     * Obtiene la dirección IP del servidor al que el cliente debe conectarse.
-     *
-     * @return IP del servidor en formato {@code "x.x.x.x"}
-     */
-    String getIpServer();
-
-    String getIdPlayer();
+    int getInt(String key);
+    String getString(String key);
+    Boolean getBoolean(String key);
 }
 
