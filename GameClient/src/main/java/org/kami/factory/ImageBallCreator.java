@@ -9,18 +9,18 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-public class ImageBallCreator extends CharacterBuilder{
+public class ImageBallCreator{
 
     /** Ruta del archivo de imagen que se utilizará para la bola */
-    private final String rutaImagen;
-    private ILayoutConfig layoutConfig;
+    //private final String rutaImagen;
+    //private ILayoutConfig layoutConfig;
 
     /**
      * Constructor que recibe la ruta de la imagen de la bola.
      *
      * @param rutaImagen ubicación del archivo de imagen
      */
-    public ImageBallCreator(String rutaImagen, ILayoutConfig layoutConfig) {
+    /*public ImageBallCreator(String rutaImagen, ILayoutConfig layoutConfig) {
         this.layoutConfig = layoutConfig;
         this.rutaImagen = rutaImagen;
     }
@@ -58,7 +58,7 @@ public class ImageBallCreator extends CharacterBuilder{
             System.err.println("[CharacterBuilder] Error al cargar imagen: " + e.getMessage());
             return null;
         }
-    }
+    }*/
 
 
 }
