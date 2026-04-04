@@ -30,7 +30,7 @@ public class PropertiesManager implements IConfigReader {
     /**
      * Objeto que almacena las propiedades cargadas desde el archivo.
      */
-    Properties prop =  new Properties();
+    Properties props =  new Properties();
 
     /**
      * Constructor que carga el archivo de propiedades desde el classpath.
@@ -43,35 +43,26 @@ public class PropertiesManager implements IConfigReader {
             if(input == null){
                 throw new RuntimeException("Error: no se encontro el archivo");
             }
-            prop.load(input);
+            props.load(input);
         }catch (IOException e){
             System.out.printf("Error critico al leer las propiedades:  "+ e.getMessage());
         }
     }
 
-    /**
-     * Obtiene el puerto configurado para el servidor.
-     *
-     * <p>
-     * Este valor se obtiene de la propiedad {@code server.port}.
-     * </p>
-     *
-     * @return el número de puerto como entero.
-     * @throws NumberFormatException si el valor no es un número válido.
-     */
+
     @Override
-    public int getPort() {
-        return Integer.parseInt(prop.getProperty("port"));
+    public int getInt(String key) {
+        return Integer.parseInt(props.getProperty(key));
     }
 
     @Override
-    public String getIpServer() {
-        return prop.getProperty("ip");
+    public String getString(String key) {
+        return  props.getProperty(key);
     }
 
     @Override
-    public String getIdPlayer() {
-        return prop.getProperty("id");
+    public Boolean getBoolean (String key) {
+        return Boolean.parseBoolean(props.getProperty(key));
     }
 
 }
