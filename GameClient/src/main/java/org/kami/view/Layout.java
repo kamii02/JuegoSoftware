@@ -122,7 +122,6 @@ public class Layout extends JPanel {
             }
         });
     }
-
     private void moveUp(){
         int newY = this.player.getPosY() - 5;
         if (!collision(this.player.getPosX(), newY)) {
@@ -163,7 +162,7 @@ public class Layout extends JPanel {
                 return true;
             }
         }
-        return  false;
+        return false;
     }
 
 
