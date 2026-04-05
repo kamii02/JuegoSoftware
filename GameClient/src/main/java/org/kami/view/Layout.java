@@ -11,6 +11,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Random;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 //Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
@@ -18,6 +21,7 @@ public class Layout extends JPanel {
     private Player player;
     private IMapsHandler mapsHandler;
     private int level;
+    private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
 
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
@@ -53,6 +57,7 @@ public class Layout extends JPanel {
         //if (player == null) return;
         Graphics2D g2d = (Graphics2D) g;
         drawMapElements(g2d);
+        drawRemotePlayers(g2d);
         drawPlayer(g2d);
 
     }
@@ -92,8 +97,37 @@ public class Layout extends JPanel {
         System.out.println("Pintando");*/
     }
 
+    private void drawRemotePlayers(Graphics2D g2d) {
+        Random rand =  new Random();
+        remotePlayers.forEach((id, pos) -> {
+            g2d.setColor(new Color(
+                    rand.nextInt(256),
+                    rand.nextInt(256),
+                    rand.nextInt(256)
+            ));
+            g2d.fillRect(pos[0], pos[1], player.getTamanio(), player.getTamanio());
+            g2d.setColor(Color.BLACK);
+            g2d.drawString(id, pos[0], pos[1]-5);
+        });
+    }
+
+    public void updRemotePlayers(Map<String, int[]>positions, String MyId) {
+        remotePlayers.clear();
+        positions.forEach((id,pos) -> {
+            if(!id.equals(MyId)){
+                remotePlayers.put(id,pos);
+            }
+        });
+        repaint();
+    }
+
     private void drawPlayer(Graphics2D g2d){
-        g2d.setColor(Color.RED);
+        Random rand = new Random();
+        g2d.setColor(new Color(
+                rand.nextInt(256),
+                rand.nextInt(256),
+                rand.nextInt(256)
+        ));
         g2d.fillRect(player.getPosX(), player.getPosY(), player.getTamanio(), player.getTamanio());
     }
 
@@ -116,22 +150,49 @@ public class Layout extends JPanel {
             }
         });
     }
-
     private void moveUp(){
-        this.player.setPosY(this.player.getPosY()-1);
-        repaint();
+        int newY = this.player.getPosY() - 5;
+        if (!collision(this.player.getPosX(), newY)) {
+            this.player.setPosY(newY);
+            repaint();
+        }
+
     }
     private void moveDown(){
-        this.player.setPosY(this.player.getPosY()+1);
-        repaint();
+        int newY = this.player.getPosY() + 5;
+        if (!collision(this.player.getPosX(), newY)) {
+            this.player.setPosY(newY);
+            repaint();
+        }
     }
     private void moveLeft(){
-        this.player.setPosX(this.player.getPosX()-1);
-        repaint();
+        int newX = this.player.getPosX() - 5;
+        if (!collision(newX, this.player.getPosY())) {
+            this.player.setPosX(newX);
+            repaint();
+        }
     }
     private void moveRight(){
-        this.player.setPosX(this.player.getPosX()+1);
-        repaint();
+        int newX = this.player.getPosX() + 5;
+        if (!collision(newX, this.player.getPosY())) {
+            this.player.setPosX(newX);
+            repaint();
+        }
     }
+
+    private boolean collision(int newX, int newY){
+        GameMap gameMap = mapsHandler.readMaps().get(level-1);
+        for(Wall wall: gameMap.getWalls()){
+            boolean chocaX = newX < wall.getX() + wall.getWidth() && newX + player.getTamanio() > wall.getX();
+            boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
+
+            if(chocaX && chocaY){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }
 
