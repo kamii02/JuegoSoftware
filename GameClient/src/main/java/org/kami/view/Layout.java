@@ -12,6 +12,8 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Random;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 //Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
@@ -19,6 +21,7 @@ public class Layout extends JPanel {
     private Player player;
     private IMapsHandler mapsHandler;
     private int level;
+    private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
 
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
@@ -54,6 +57,7 @@ public class Layout extends JPanel {
         //if (player == null) return;
         Graphics2D g2d = (Graphics2D) g;
         drawMapElements(g2d);
+        drawRemotePlayers(g2d);
         drawPlayer(g2d);
 
     }
@@ -91,6 +95,30 @@ public class Layout extends JPanel {
             g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
         }
         System.out.println("Pintando");*/
+    }
+
+    private void drawRemotePlayers(Graphics2D g2d) {
+        Random rand =  new Random();
+        remotePlayers.forEach((id, pos) -> {
+            g2d.setColor(new Color(
+                    rand.nextInt(256),
+                    rand.nextInt(256),
+                    rand.nextInt(256)
+            ));
+            g2d.fillRect(pos[0], pos[1], player.getTamanio(), player.getTamanio());
+            g2d.setColor(Color.BLACK);
+            g2d.drawString(id, pos[0], pos[1]-5);
+        });
+    }
+
+    public void updRemotePlayers(Map<String, int[]>positions, String MyId) {
+        remotePlayers.clear();
+        positions.forEach((id,pos) -> {
+            if(!id.equals(MyId)){
+                remotePlayers.put(id,pos);
+            }
+        });
+        repaint();
     }
 
     private void drawPlayer(Graphics2D g2d){
