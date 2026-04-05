@@ -4,7 +4,9 @@ import org.kami.config.element.CharacterStatus;
 import org.kami.config.element.Player;
 import org.kami.config.ILayoutConfig;
 import org.kami.config.maps.IMapsHandler;
+import org.kami.view.maps.elements.CoinAnimator;
 import org.kami.view.maps.elements.GameMap;
+import org.kami.view.maps.elements.ICoinAnimator;
 import org.kami.view.maps.elements.Wall;
 
 import javax.swing.*;
@@ -22,6 +24,7 @@ public class Layout extends JPanel {
     private IMapsHandler mapsHandler;
     private int level;
     private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
+    private ICoinAnimator coinAnimator;
 
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
@@ -31,6 +34,9 @@ public class Layout extends JPanel {
         this.player = player;
         this.level = 1;
         this.mapsHandler = mapsHandler;
+        this.coinAnimator = new CoinAnimator(500, this::repaint);
+        coinAnimator.start();
+
 
 
         /*
@@ -80,21 +86,27 @@ public class Layout extends JPanel {
 
     private void drawMapElements(Graphics2D g2d) {
         GameMap gameMap = mapsHandler.readMaps().get(level-1);
+
+        System.out.println("Monedas: " + gameMap.getCoins().size());
+        System.out.println("Visible: " + coinAnimator.isVisible());
+        gameMap.getCoins().forEach(coin -> {
+            System.out.println("Coin -> x=" + coin.getX() + " y=" + coin.getY()
+                    + " w=" + coin.getWidth() + " h=" + coin.getHeight());
+        });
+
         gameMap.getWalls().forEach(wall -> {
             g2d.setColor(Color.BLACK);
             g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
         });
-        gameMap.getCoins().forEach(coin -> {
-            g2d.setColor(Color.PINK);
-            g2d.fillOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
-            g2d.setColor(Color.BLACK);
-            g2d.drawOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
-        });
-        /*for(Wall wall : gameMap.getWalls()){
-            g2d.setColor(Color.BLACK);
-            g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
+
+        if (coinAnimator.isVisible()) {
+            gameMap.getCoins().forEach(coin -> {
+                g2d.setColor(Color.PINK);
+                g2d.fillOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
+                g2d.setColor(Color.BLACK);
+                g2d.drawOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
+            });
         }
-        System.out.println("Pintando");*/
     }
 
     private void drawRemotePlayers(Graphics2D g2d) {

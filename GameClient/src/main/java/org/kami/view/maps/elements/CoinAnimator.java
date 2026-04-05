@@ -5,9 +5,11 @@ public class CoinAnimator implements ICoinAnimator{
     private volatile boolean running = false;
     private Thread thread;
     private final int intervalMs; // cada cuánto parpadea
+    private Runnable onTick;
 
-    public CoinAnimator(int intervalMs) {
+    public CoinAnimator(int intervalMs, Runnable onTick) {
         this.intervalMs = intervalMs;
+        this.onTick = onTick;
     }
 
     @Override
@@ -17,6 +19,7 @@ public class CoinAnimator implements ICoinAnimator{
             while (running) {
                 try {
                     visible = !visible;
+                    onTick.run();
                     Thread.sleep(intervalMs);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
