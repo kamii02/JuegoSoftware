@@ -1,5 +1,6 @@
 package org.kami;
 
+import org.kami.client.SwingRenderer;
 import org.kami.config.*;
 import org.kami.config.element.Player;
 import org.kami.client.AppConfig;
@@ -35,7 +36,7 @@ public class Main {
         // --- Arranque de red (3 líneas, nunca más) ---
         IConfigReader  configReader    = new PropertiesManager("application.properties");
         IUDPConfig     config          = new UDPConfig(configReader);
-        NetworkManager network         = new NetworkManager(config, new ConsoleRenderer());
+        NetworkManager network         = new NetworkManager(config, new SwingRenderer(l, config.getPlayerId()));
 
         network.connect();
 
