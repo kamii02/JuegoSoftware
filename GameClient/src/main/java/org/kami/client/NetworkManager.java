@@ -1,6 +1,8 @@
 package org.kami.client;
 
 
+import org.kami.config.IUDPConfig;
+import org.kami.config.UDPConfig;
 import org.kami.shared.GameState;
 import org.kami.shared.IGameRenderer;
 
@@ -17,16 +19,17 @@ public class NetworkManager {
     private final IGameRenderer renderer;
     private final String        playerId;
 
-    public NetworkManager(AppConfig config, IGameRenderer renderer) {
+    public NetworkManager(IUDPConfig config, IGameRenderer renderer) {
         this.playerId   = config.getPlayerId();
         this.renderer   = renderer;
-        this.connection = new UdpConnection(config.getServerIp(), config.getServerPort());
+        this.connection = new UdpConnection(config.getIp(), config.getPort());
     }
 
     /** Conecta y arranca el hilo receptor. Llama esto al iniciar el juego. */
     public void connect() throws Exception {
         connection.connect();
         startListening();
+        connection.send("MOVE" + playerId + "0 0");
         System.out.println("[NetworkManager] Conectado como " + playerId);
     }
 

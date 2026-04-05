@@ -3,19 +3,37 @@ package org.kami.view;
 import org.kami.config.element.CharacterStatus;
 import org.kami.config.element.Player;
 import org.kami.config.ILayoutConfig;
+import org.kami.config.maps.IMapsHandler;
+import org.kami.view.maps.elements.GameMap;
+import org.kami.view.maps.elements.Wall;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.Random;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 //Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
 
     private Player player;
+    private IMapsHandler mapsHandler;
+    private int level;
+    private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
 
 
-    public Layout(ILayoutConfig config, Player player){
+    public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
+        setFocusable(true);
+        requestFocusInWindow();
+        startControlls();
         this.player = player;
+        this.level = 1;
+        this.mapsHandler = mapsHandler;
 
 
+        /*
         int width = config.getWidth();
         int height = config.getHeight();
 
@@ -23,7 +41,7 @@ public class Layout extends JPanel {
             throw new IllegalArgumentException("Dimensiones inválidas");
         }
 
-        setPreferredSize(new Dimension(width, height));
+        setPreferredSize(new Dimension(width, height));*/
         setBackground(new Color(173, 216, 230));
     }
 
@@ -36,10 +54,12 @@ public class Layout extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (player == null) return;
+        //if (player == null) return;
         Graphics2D g2d = (Graphics2D) g;
-        aplicarCalidadRenderizado(g2d);
-        drawBall(g2d);
+        drawMapElements(g2d);
+        drawRemotePlayers(g2d);
+        drawPlayer(g2d);
+
     }
 
     /**
@@ -56,27 +76,123 @@ public class Layout extends JPanel {
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
     }
 
-    /**
-     * Dibuja la bola en el panel usando su estado actual.
-     * Si la imagen no está disponible, se dibuja un círculo como respaldo.
-     *
-     * @param g2d objeto Graphics2D utilizado para dibujar
-     */
-    private void drawBall(Graphics2D g2d) {
-        CharacterStatus status = player.getStatus();
 
-        int x   = status.getPosX();
-        int y   = status.getPosY();
-        int tam = status.getTamanio();
 
-        if (player.getImagen() != null) {
-            g2d.drawImage(player.getImagen(), x, y, tam, tam, this);
-        } else {
-            g2d.setColor(Color.WHITE);
-            g2d.fillOval(x, y, tam, tam);
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.drawOval(x, y, tam, tam);
+    private void drawMapElements(Graphics2D g2d) {
+        GameMap gameMap = mapsHandler.readMaps().get(level-1);
+        gameMap.getWalls().forEach(wall -> {
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
+        });
+        gameMap.getCoins().forEach(coin -> {
+            g2d.setColor(Color.PINK);
+            g2d.fillOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
+            g2d.setColor(Color.BLACK);
+            g2d.drawOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
+        });
+        /*for(Wall wall : gameMap.getWalls()){
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
+        }
+        System.out.println("Pintando");*/
+    }
+
+    private void drawRemotePlayers(Graphics2D g2d) {
+        Random rand =  new Random();
+        remotePlayers.forEach((id, pos) -> {
+            g2d.setColor(new Color(
+                    rand.nextInt(256),
+                    rand.nextInt(256),
+                    rand.nextInt(256)
+            ));
+            g2d.fillRect(pos[0], pos[1], player.getTamanio(), player.getTamanio());
+            g2d.setColor(Color.BLACK);
+            g2d.drawString(id, pos[0], pos[1]-5);
+        });
+    }
+
+    public void updRemotePlayers(Map<String, int[]>positions, String MyId) {
+        remotePlayers.clear();
+        positions.forEach((id,pos) -> {
+            if(!id.equals(MyId)){
+                remotePlayers.put(id,pos);
+            }
+        });
+        repaint();
+    }
+
+    private void drawPlayer(Graphics2D g2d){
+        Random rand = new Random();
+        g2d.setColor(new Color(
+                rand.nextInt(256),
+                rand.nextInt(256),
+                rand.nextInt(256)
+        ));
+        g2d.fillRect(player.getPosX(), player.getPosY(), player.getTamanio(), player.getTamanio());
+    }
+
+    public void setLevel(int level){
+        this.level = level;
+        repaint();
+    }
+
+    public void startControlls(){
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e){
+                switch (e.getKeyCode()){
+                    case KeyEvent.VK_UP    -> moveUp();
+                    case KeyEvent.VK_DOWN  -> moveDown();
+                    case KeyEvent.VK_LEFT  -> moveLeft();
+                    case KeyEvent.VK_RIGHT -> moveRight();
+
+                }
+            }
+        });
+    }
+    private void moveUp(){
+        int newY = this.player.getPosY() - 5;
+        if (!collision(this.player.getPosX(), newY)) {
+            this.player.setPosY(newY);
+            repaint();
+        }
+
+    }
+    private void moveDown(){
+        int newY = this.player.getPosY() + 5;
+        if (!collision(this.player.getPosX(), newY)) {
+            this.player.setPosY(newY);
+            repaint();
         }
     }
+    private void moveLeft(){
+        int newX = this.player.getPosX() - 5;
+        if (!collision(newX, this.player.getPosY())) {
+            this.player.setPosX(newX);
+            repaint();
+        }
+    }
+    private void moveRight(){
+        int newX = this.player.getPosX() + 5;
+        if (!collision(newX, this.player.getPosY())) {
+            this.player.setPosX(newX);
+            repaint();
+        }
+    }
+
+    private boolean collision(int newX, int newY){
+        GameMap gameMap = mapsHandler.readMaps().get(level-1);
+        for(Wall wall: gameMap.getWalls()){
+            boolean chocaX = newX < wall.getX() + wall.getWidth() && newX + player.getTamanio() > wall.getX();
+            boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
+
+            if(chocaX && chocaY){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }
 
