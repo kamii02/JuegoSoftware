@@ -11,4 +11,10 @@ public class UDPConfig  implements  IUDPConfig{
     public int getPort() {
         return configReader.getInt("port");
     }
+
+    @Override
+    public String getIp() {return configReader.getString("ip");}
+
+    @Override
+    public String getPlayerId() {return configReader.getString("id");}
 }

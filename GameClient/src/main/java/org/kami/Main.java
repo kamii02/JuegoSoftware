@@ -1,13 +1,10 @@
 package org.kami;
 
+import org.kami.config.*;
 import org.kami.config.element.Player;
 import org.kami.client.AppConfig;
 import org.kami.client.ConsoleRenderer;
 import org.kami.client.NetworkManager;
-import org.kami.config.IConfigReader;
-import org.kami.config.ILayoutConfig;
-import org.kami.config.LayoutConfig;
-import org.kami.config.PropertiesManager;
 import org.kami.config.maps.IMapsHandler;
 import org.kami.config.maps.MapReader;
 import org.kami.factory.ImageBallCreator;
@@ -36,8 +33,9 @@ public class Main {
         l.setLevel(3);*/
 
         // --- Arranque de red (3 líneas, nunca más) ---
-        AppConfig      config  = new AppConfig();
-        NetworkManager network = new NetworkManager(config, new ConsoleRenderer());
+        IConfigReader  configReader    = new PropertiesManager("application.properties");
+        IUDPConfig     config          = new UDPConfig(configReader);
+        NetworkManager network         = new NetworkManager(config, new ConsoleRenderer());
 
         network.connect();
 
