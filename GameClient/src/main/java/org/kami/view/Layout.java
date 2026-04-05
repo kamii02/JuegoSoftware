@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Random;
 
 //Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
@@ -93,7 +94,12 @@ public class Layout extends JPanel {
     }
 
     private void drawPlayer(Graphics2D g2d){
-        g2d.setColor(Color.RED);
+        Random rand = new Random();
+        g2d.setColor(new Color(
+                rand.nextInt(256),
+                rand.nextInt(256),
+                rand.nextInt(256)
+        ));
         g2d.fillRect(player.getPosX(), player.getPosY(), player.getTamanio(), player.getTamanio());
     }
 
@@ -118,20 +124,48 @@ public class Layout extends JPanel {
     }
 
     private void moveUp(){
-        this.player.setPosY(this.player.getPosY()-1);
-        repaint();
+        int newY = this.player.getPosY() - 5;
+        if (!collision(this.player.getPosX(), newY)) {
+            this.player.setPosY(newY);
+            repaint();
+        }
+
     }
     private void moveDown(){
-        this.player.setPosY(this.player.getPosY()+1);
-        repaint();
+        int newY = this.player.getPosY() + 5;
+        if (!collision(this.player.getPosX(), newY)) {
+            this.player.setPosY(newY);
+            repaint();
+        }
     }
     private void moveLeft(){
-        this.player.setPosX(this.player.getPosX()-1);
-        repaint();
+        int newX = this.player.getPosX() - 5;
+        if (!collision(newX, this.player.getPosY())) {
+            this.player.setPosX(newX);
+            repaint();
+        }
     }
     private void moveRight(){
-        this.player.setPosX(this.player.getPosX()+1);
-        repaint();
+        int newX = this.player.getPosX() + 5;
+        if (!collision(newX, this.player.getPosY())) {
+            this.player.setPosX(newX);
+            repaint();
+        }
     }
+
+    private boolean collision(int newX, int newY){
+        GameMap gameMap = mapsHandler.readMaps().get(level-1);
+        for(Wall wall: gameMap.getWalls()){
+            boolean chocaX = newX < wall.getX() + wall.getWidth() && newX + player.getTamanio() > wall.getX();
+            boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
+
+            if(chocaX && chocaY){
+                return true;
+            }
+        }
+        return  false;
+    }
+
+
 }
 
