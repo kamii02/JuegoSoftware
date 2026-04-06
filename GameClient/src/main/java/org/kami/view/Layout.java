@@ -16,6 +16,7 @@ import java.awt.event.KeyEvent;
 import java.util.Random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 //Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
@@ -25,6 +26,7 @@ public class Layout extends JPanel {
     private int level;
     private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
     private ICoinAnimator coinAnimator;
+    private BiConsumer<Integer,Integer> onMove;
 
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
@@ -49,6 +51,10 @@ public class Layout extends JPanel {
 
         setPreferredSize(new Dimension(width, height));*/
         setBackground(new Color(173, 216, 230));
+    }
+
+    public void setOnMove(BiConsumer<Integer, Integer> onMove) {
+        this.onMove = onMove;
     }
 
     /**
@@ -167,6 +173,7 @@ public class Layout extends JPanel {
         if (!collision(this.player.getPosX(), newY)) {
             this.player.setPosY(newY);
             repaint();
+            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
         }
 
     }
@@ -175,6 +182,7 @@ public class Layout extends JPanel {
         if (!collision(this.player.getPosX(), newY)) {
             this.player.setPosY(newY);
             repaint();
+            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
         }
     }
     private void moveLeft(){
@@ -182,6 +190,7 @@ public class Layout extends JPanel {
         if (!collision(newX, this.player.getPosY())) {
             this.player.setPosX(newX);
             repaint();
+            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
         }
     }
     private void moveRight(){
@@ -189,6 +198,7 @@ public class Layout extends JPanel {
         if (!collision(newX, this.player.getPosY())) {
             this.player.setPosX(newX);
             repaint();
+            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
         }
     }
 

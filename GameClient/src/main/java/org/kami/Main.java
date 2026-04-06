@@ -57,6 +57,9 @@ public class Main {
 
         network.connect();
 
+        //Conectamos la logica independiente que conecta el movimiento con la red
+        l.setOnMove((x, y) -> network.sendPosition(x,y));
+
         // --- Aquí va toda tu lógica del juego ---
         int x = 100, y = 100;
         // Ejemplo: cuando tu personaje se mueva, llamas:
