@@ -3,6 +3,7 @@ package org.kami.config.maps;
 import org.kami.config.ILayoutConfig;
 import org.kami.config.LayoutConfig;
 import org.kami.view.maps.elements.Coin;
+import org.kami.view.maps.elements.Door;
 import org.kami.view.maps.elements.GameMap;
 import org.kami.view.maps.elements.Wall;
 import org.kami.view.maps.mapelementsfactory.IMapElement;
@@ -32,6 +33,7 @@ public class MapReader implements IMapsHandler {
         GameMap gameMap = new GameMap();
         List<Wall> walls = new ArrayList<>();
         List<Coin> coins = new ArrayList<>();
+        List<Door> doors = new ArrayList<>();
         try(InputStream input = getClass().getClassLoader().getResourceAsStream(path)) {
             BufferedReader br = new BufferedReader(new InputStreamReader(input));
             String line;
@@ -46,6 +48,7 @@ public class MapReader implements IMapsHandler {
                 switch (type){
                     case MapElementType.WALL -> walls.add((Wall)element);
                     case MapElementType.COIN -> coins.add((Coin)element);
+                    case MapElementType.DOOR -> doors.add((Door)element);
                 }
             }
             gameMap.setWalls(walls);
