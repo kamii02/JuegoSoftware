@@ -16,6 +16,8 @@ import org.kami.audio.IMusicPlayer;
 import org.kami.audio.MusicPlayer;
 
 import java.util.List;
+import org.kami.audio.ISoundEffect;
+import org.kami.audio.SoundEffect;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -36,6 +38,12 @@ public class Main {
         // Iniciamos la música antes de mostrar la ventana.
         // A partir de aquí suena en bucle continuo en un hilo daemon de Java Sound.
         musicPlayer.play();
+
+
+        ISoundEffect coinSound            = new SoundEffect(reader.getString("sound.coin"));
+        ISoundEffect wallCollisionSound   = new SoundEffect(reader.getString("sound.wall"));
+        ISoundEffect playerCollisionSound = new SoundEffect(reader.getString("sound.player"));
+
 
         //Player player = creator.CharacterBuilder(800, 800);
         //Maps config
@@ -59,6 +67,9 @@ public class Main {
 
         //Conectamos la logica independiente que conecta el movimiento con la red
         l.setOnMove((x, y) -> network.sendPosition(x,y));
+        l.setCoinSound(coinSound);
+        l.setWallCollisionSound(wallCollisionSound);
+        l.setPlayerCollisionSound(playerCollisionSound);
 
         // --- Aquí va toda tu lógica del juego ---
         int x = 100, y = 100;

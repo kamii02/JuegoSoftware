@@ -17,6 +17,7 @@ import java.util.Random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import org.kami.audio.ISoundEffect;
 
 //Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
@@ -27,6 +28,9 @@ public class Layout extends JPanel {
     private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
     private ICoinAnimator coinAnimator;
     private BiConsumer<Integer,Integer> onMove;
+    private ISoundEffect coinSound;
+    private ISoundEffect wallCollisionSound;
+    private ISoundEffect playerCollisionSound;
 
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
@@ -55,6 +59,34 @@ public class Layout extends JPanel {
 
     public void setOnMove(BiConsumer<Integer, Integer> onMove) {
         this.onMove = onMove;
+    }
+
+    /**
+     * Inyecta el efecto de sonido que se reproduce al recoger una moneda.
+     * Se llama desde Main.java, igual que setOnMove.
+     *
+     * @param coinSound efecto de sonido para moneda recogida
+     */
+    public void setCoinSound(ISoundEffect coinSound) {
+        this.coinSound = coinSound;
+    }
+
+    /**
+     * Inyecta el efecto de sonido que se reproduce al colisionar con una pared.
+     *
+     * @param wallCollisionSound efecto de sonido para colisión con pared
+     */
+    public void setWallCollisionSound(ISoundEffect wallCollisionSound) {
+        this.wallCollisionSound = wallCollisionSound;
+    }
+
+    /**
+     * Inyecta el efecto de sonido que se reproduce al colisionar con otro jugador.
+     *
+     * @param playerCollisionSound efecto de sonido para colisión entre jugadores
+     */
+    public void setPlayerCollisionSound(ISoundEffect playerCollisionSound) {
+        this.playerCollisionSound = playerCollisionSound;
     }
 
     /**
@@ -137,6 +169,7 @@ public class Layout extends JPanel {
             }
         });
         repaint();
+        checkPlayerCollision();
     }
 
     private void drawPlayer(Graphics2D g2d){
@@ -174,6 +207,10 @@ public class Layout extends JPanel {
             this.player.setPosY(newY);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
+            checkCoinCollision();
+        }
+        else {
+            if (wallCollisionSound != null) wallCollisionSound.play();
         }
 
     }
@@ -183,6 +220,10 @@ public class Layout extends JPanel {
             this.player.setPosY(newY);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
+            checkCoinCollision();
+        }
+        else {
+            if (wallCollisionSound != null) wallCollisionSound.play();
         }
     }
     private void moveLeft(){
@@ -191,6 +232,10 @@ public class Layout extends JPanel {
             this.player.setPosX(newX);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
+            checkCoinCollision();
+        }
+        else {
+            if (wallCollisionSound != null) wallCollisionSound.play();
         }
     }
     private void moveRight(){
@@ -199,6 +244,10 @@ public class Layout extends JPanel {
             this.player.setPosX(newX);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
+            checkCoinCollision();
+        }
+        else {
+            if (wallCollisionSound != null) wallCollisionSound.play();
         }
     }
 
@@ -214,7 +263,47 @@ public class Layout extends JPanel {
         }
         return false;
     }
+    private void checkCoinCollision() {
+        GameMap gameMap = mapsHandler.readMaps().get(level - 1);
+        int px = player.getPosX();
+        int py = player.getPosY();
+        int ps = player.getTamanio();
 
+        gameMap.getCoins().forEach(coin -> {
+            boolean solapaX = px < coin.getX() + coin.getWidth()  && px + ps > coin.getX();
+            boolean solapaY = py < coin.getY() + coin.getHeight() && py + ps > coin.getY();
+
+            if (solapaX && solapaY) {
+                if (coinSound != null) coinSound.play();
+            }
+        });
+    }
+
+    /**
+     * Verifica si el jugador local colisiona con algún jugador remoto.
+     * Se llama desde {@link #updRemotePlayers} cada vez que llegan
+     * posiciones nuevas del servidor.
+     *
+     * <p>
+     * Usa el mismo algoritmo AABB que {@link #collision(int, int)} y
+     * {@link #checkCoinCollision()}, manteniendo consistencia en el proyecto.
+     * </p>
+     */
+    private void checkPlayerCollision() {
+        int px = player.getPosX();
+        int py = player.getPosY();
+        int ps = player.getTamanio();
+
+        remotePlayers.forEach((id, pos) -> {
+            // pos[0] = x del jugador remoto, pos[1] = y del jugador remoto
+            boolean solapaX = px < pos[0] + ps && px + ps > pos[0];
+            boolean solapaY = py < pos[1] + ps && py + ps > pos[1];
+
+            if (solapaX && solapaY) {
+                if (playerCollisionSound != null) playerCollisionSound.play();
+            }
+        });
+    }
 
 }
 

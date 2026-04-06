@@ -5,6 +5,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import javax.sound.sampled.FloatControl;
 
 /**
  * Implementación de {@link IMusicPlayer} que reproduce un archivo .wav
@@ -91,8 +92,20 @@ public class MusicPlayer implements IMusicPlayer {
     @Override
     public void play() {
         if (clip != null) {
-            clip.setFramePosition(0);            // Rebobina al inicio
-            clip.loop(Clip.LOOP_CONTINUOUSLY);   // Reproduce en bucle infinito
+            clip.setFramePosition(0);
+
+            // FloatControl permite ajustar el volumen del clip en decibeles (dB).
+            // MASTER_GAIN es el control estándar de volumen de Java Sound.
+            FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+
+            // El rango típico es de -80.0 dB (silencio) a 6.0 dB (máximo).
+            // -15.0 dB es un volumen moderado. Ajusta este valor a tu gusto:
+            //   -5.0  → casi al máximo
+            //   -15.0 → moderado  ← recomendado para música de fondo
+            //   -30.0 → muy bajo
+            volume.setValue(-15.0f);
+
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
         }
     }
 
