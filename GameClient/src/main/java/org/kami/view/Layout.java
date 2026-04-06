@@ -137,6 +137,11 @@ public class Layout extends JPanel {
             g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
         });
 
+        gameMap.getDoors().forEach(door -> {
+            g2d.setColor(Color.RED); // color de la puerta
+            g2d.fillRect(door.getX(), door.getY(), door.getWidth(), door.getHeight());
+        });
+
         if (coinAnimator.isVisible()) {
             gameMap.getCoins().forEach(coin -> {
                 g2d.setColor(Color.PINK);
@@ -208,6 +213,7 @@ public class Layout extends JPanel {
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
             checkCoinCollision();
+            checkDoorCollision();
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
@@ -278,6 +284,36 @@ public class Layout extends JPanel {
             }
         });
     }
+
+    private void checkDoorCollision() {
+        GameMap gameMap = mapsHandler.readMaps().get(level - 1);
+        int px = player.getPosX();
+        int py = player.getPosY();
+        int ps = player.getTamanio();
+
+        for (var door : gameMap.getDoors()) {
+            boolean solapaX = px < door.getX() + door.getWidth() && px + ps > door.getX();
+            boolean solapaY = py < door.getY() + door.getHeight() && py + ps > door.getY();
+
+            if (solapaX && solapaY) {
+                int totalLevels = mapsHandler.readMaps().size();
+                if (level < totalLevels) {
+                    level++; // siguiente nivel
+                } else {
+                    level = 1; // reinicia si es el último mapa
+                }
+
+                // Posición inicial segura en el nuevo mapa (ajusta si quieres otra)
+                player.setPosX(100);
+                player.setPosY(700);
+
+                repaint(); // redibuja el nuevo nivel
+                break; // no necesitamos seguir revisando
+            }
+        }
+    }
+
+
 
     /**
      * Verifica si el jugador local colisiona con algún jugador remoto.

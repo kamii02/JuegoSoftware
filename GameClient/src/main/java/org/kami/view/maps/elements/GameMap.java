@@ -12,5 +12,5 @@ import java.util.List;
 public class GameMap {
     private List<Wall> walls;
     private List<Coin> coins;
-    private List<Door> Doors;
+    private List<Door> doors;
 }

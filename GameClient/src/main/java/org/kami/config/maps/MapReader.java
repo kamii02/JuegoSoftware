@@ -53,6 +53,7 @@ public class MapReader implements IMapsHandler {
             }
             gameMap.setWalls(walls);
             gameMap.setCoins(coins);
+            gameMap.setDoors(doors);
         }catch (IOException e){
             System.out.println("Error critico al leer las caracteristicas del mapa:  "+ e.getMessage());
         }
