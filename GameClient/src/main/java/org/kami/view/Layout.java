@@ -32,7 +32,12 @@ public class Layout extends JPanel {
     private ISoundEffect wallCollisionSound;
     private ISoundEffect playerCollisionSound;
     private boolean changeLevel = false;
-
+    private static final Map<Integer, int[]> SPAWN_POSITIONS = Map.of(
+            1, new int[]{100,700},
+            2, new int[]{600,740},
+            3, new int[]{220,740},
+            4, new int[]{50,740}
+    );
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
         setFocusable(true);
@@ -220,6 +225,7 @@ public class Layout extends JPanel {
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
 
     }
@@ -235,6 +241,7 @@ public class Layout extends JPanel {
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
     }
     private void moveLeft(){
@@ -249,6 +256,7 @@ public class Layout extends JPanel {
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
     }
     private void moveRight(){
@@ -263,6 +271,7 @@ public class Layout extends JPanel {
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
     }
 
@@ -273,9 +282,7 @@ public class Layout extends JPanel {
             boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
 
             if(chocaX && chocaY){
-                System.out.println("[COLLISION] Pared: x=" + wall.getX() + " y=" + wall.getY()
-                        + " w=" + wall.getWidth() + " h=" + wall.getHeight()
-                        + " | Player: x=" + newX + " y=" + newY);
+
                 return true;
             }
         }
@@ -319,12 +326,7 @@ public class Layout extends JPanel {
                         level = 1;
                     }
 
-                    switch (level) {
-                        case 1 -> { player.setPosX(100); player.setPosY(700); }
-                        case 2 -> { player.setPosX(600); player.setPosY(740); }
-                        case 3 -> { player.setPosX(220);  player.setPosY(740); }
-                        case 4 -> { player.setPosX(50);  player.setPosY(740); }
-                    }
+                    spawnPlayer();
 
                     repaint();
                     requestFocusInWindow();
@@ -334,8 +336,6 @@ public class Layout extends JPanel {
                     t.start();
                 });
     }
-
-
 
     /**
      * Verifica si el jugador local colisiona con algún jugador remoto.
@@ -361,6 +361,18 @@ public class Layout extends JPanel {
                 if (playerCollisionSound != null) playerCollisionSound.play();
             }
         });
+    }
+
+    /**
+     * Metodo que asigna la posicion a un player segun el level en el que este
+     * evitando codesmell al repetir el seteo de posiciones en los diferentes metodos
+     */
+    private void spawnPlayer(){
+        int[] pos = SPAWN_POSITIONS.get(level);
+        if(pos != null){
+            player.setPosX(pos[0]);
+            player.setPosY(pos[1]);
+        }
     }
 
 }
