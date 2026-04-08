@@ -11,8 +11,8 @@ public class GameState {
     private final Map<String, int[]> positions = new ConcurrentHashMap<>();
     private final List<IStateListener> listeners  = new ArrayList<>();
 
-    public void updatePosition(String playerId, int x, int y) {
-        positions.put(playerId, new int[]{x, y});
+    public void updatePosition(String playerId, int x, int y, int level) {
+        positions.put(playerId, new int[]{x, y, level});
         notifyListeners();
     }
 
@@ -28,11 +28,15 @@ public class GameState {
         listeners.forEach(l -> l.onStateChanged(this));
     }
 
-    /** Serializa: "PLAYER_1:100,200|PLAYER_2:150,320|" */
+    /** Serializa: "PLAYER_1:100,200,1|PLAYER_2:150,320,4|" */
     public String serialize() {
         StringBuilder sb = new StringBuilder();
         positions.forEach((id, pos) ->
-                sb.append(id).append(":").append(pos[0]).append(",").append(pos[1]).append("|")
+                sb.append(id).append(":")
+                        .append(pos[0]).append(",")
+                        .append(pos[1]).append(",")
+                        .append(pos[2])
+                        .append("|")
         );
         return sb.toString();
     }
@@ -47,7 +51,8 @@ public class GameState {
             state.updatePosition(
                     parts[0],
                     Integer.parseInt(coords[0]),
-                    Integer.parseInt(coords[1])
+                    Integer.parseInt(coords[1]),
+                    Integer.parseInt(coords[2])
             );
         }
         return state;

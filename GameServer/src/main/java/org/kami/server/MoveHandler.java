@@ -16,8 +16,9 @@ public class MoveHandler implements IMessageHandler {
             String playerId = parts[1];
             int x           = Integer.parseInt(parts[2]);
             int y           = Integer.parseInt(parts[3]);
+            int level       = Integer.parseInt(parts[4]);
 
-            state.updatePosition(playerId, x, y);
+            state.updatePosition(playerId, x, y, level);
             broadcaster.broadcast(state.serialize());
 
         } catch (Exception e) {

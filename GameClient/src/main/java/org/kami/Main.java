@@ -66,15 +66,10 @@ public class Main {
         network.connect();
 
         //Conectamos la logica independiente que conecta el movimiento con la red
-        l.setOnMove((x, y) -> network.sendPosition(x,y));
+        l.setOnMove(data -> network.sendPosition(data[0], data[1], data[2]));
         l.setCoinSound(coinSound);
         l.setWallCollisionSound(wallCollisionSound);
         l.setPlayerCollisionSound(playerCollisionSound);
-
-        // --- Aquí va toda tu lógica del juego ---
-        int x = 100, y = 100;
-        // Ejemplo: cuando tu personaje se mueva, llamas:
-        network.sendPosition(x, y);
 
         // Cuando el juego cierre:
         //network.disconnect();

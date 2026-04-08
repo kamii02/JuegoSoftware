@@ -29,7 +29,7 @@ public class NetworkManager {
     public void connect() throws Exception {
         connection.connect();
         startListening();
-        connection.send("MOVE" + playerId + "0 0");
+        connection.send("MOVE " + playerId + " 0 0 1");
         System.out.println("[NetworkManager] Conectado como " + playerId);
     }
 
@@ -37,8 +37,8 @@ public class NetworkManager {
      * Envía la posición del jugador al servidor.
      * Llama esto cada vez que tu personaje se mueva.
      */
-    public void sendPosition(int x, int y) {
-        connection.send("MOVE " + playerId + " " + x + " " + y);
+    public void sendPosition(int x, int y, int level) {
+        connection.send("MOVE " + playerId + " " + x + " " + y + " " + level);
     }
 
     /** Cierra la conexión. Llama esto al salir del juego. */
