@@ -19,6 +19,8 @@ public class MapElementFactory implements IMapElementFactory{
     }
 
     public IMapElement createMapElement(MapElementType type){
-        return factory.get(type).get();
+        Supplier<IMapElement> supplier = factory.get(type);
+        if (supplier == null) return null;
+        return supplier.get();
     }
 }

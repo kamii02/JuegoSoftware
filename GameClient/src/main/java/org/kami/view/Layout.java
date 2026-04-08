@@ -1,37 +1,42 @@
 package org.kami.view;
 
-import org.kami.config.element.CharacterStatus;
 import org.kami.config.element.Player;
 import org.kami.config.ILayoutConfig;
 import org.kami.config.maps.IMapsHandler;
-import org.kami.view.maps.elements.CoinAnimator;
-import org.kami.view.maps.elements.GameMap;
-import org.kami.view.maps.elements.ICoinAnimator;
-import org.kami.view.maps.elements.Wall;
+import org.kami.view.maps.elements.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import org.kami.audio.ISoundEffect;
 
-//Recibe ancho y alto y dibuja
 public class Layout extends JPanel {
 
     private Player player;
     private IMapsHandler mapsHandler;
     private int level;
+
     private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
-    private ICoinAnimator coinAnimator;
+
     private BiConsumer<Integer,Integer> onMove;
+
     private ISoundEffect coinSound;
     private ISoundEffect wallCollisionSound;
     private ISoundEffect playerCollisionSound;
+    private CoinAnimator coinAnimator;
     private boolean changeLevel = false;
+
+    private Image coinImage;
+    private IBackgroundLoader backgroundLoader;
+    private Map<String, Image> imageCache = new HashMap<>();
+
     private static final Map<Integer, int[]> SPAWN_POSITIONS = Map.of(
             1, new int[]{100,700},
             2, new int[]{600,740},
@@ -39,127 +44,129 @@ public class Layout extends JPanel {
             4, new int[]{50,740}
     );
 
-    public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
-        setFocusable(true);
-        requestFocusInWindow();
-        startControlls();
+    public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player) {
         this.player = player;
         this.level = 1;
         this.mapsHandler = mapsHandler;
-        this.coinAnimator = new CoinAnimator(500, this::repaint);
+        this.backgroundLoader = new BackgroundLoader(mapsHandler); // ✅ se crea aquí directamente
+
+        setFocusable(true);
+        requestFocusInWindow();
+        startControlls();
+
+        this.backgroundLoader.load(level); // ✅ ya no es null
+
+        this.coinAnimator = new CoinAnimator(7000, this::repaint);
         coinAnimator.start();
-
-
-
-        /*
-        int width = config.getWidth();
-        int height = config.getHeight();
-
-        if (width <= 0 || height <= 0) {
-            throw new IllegalArgumentException("Dimensiones inválidas");
-        }
-
-        setPreferredSize(new Dimension(width, height));*/
-        setBackground(new Color(173, 216, 230));
     }
 
     public void setOnMove(BiConsumer<Integer, Integer> onMove) {
         this.onMove = onMove;
     }
 
-    /**
-     * Inyecta el efecto de sonido que se reproduce al recoger una moneda.
-     * Se llama desde Main.java, igual que setOnMove.
-     *
-     * @param coinSound efecto de sonido para moneda recogida
-     */
     public void setCoinSound(ISoundEffect coinSound) {
         this.coinSound = coinSound;
     }
 
-    /**
-     * Inyecta el efecto de sonido que se reproduce al colisionar con una pared.
-     *
-     * @param wallCollisionSound efecto de sonido para colisión con pared
-     */
     public void setWallCollisionSound(ISoundEffect wallCollisionSound) {
         this.wallCollisionSound = wallCollisionSound;
     }
 
-    /**
-     * Inyecta el efecto de sonido que se reproduce al colisionar con otro jugador.
-     *
-     * @param playerCollisionSound efecto de sonido para colisión entre jugadores
-     */
     public void setPlayerCollisionSound(ISoundEffect playerCollisionSound) {
         this.playerCollisionSound = playerCollisionSound;
     }
 
-    /**
-     * Método de Swing encargado de dibujar el contenido del panel.
-     * Muestra el último estado de la bola y registra el evento.
-     *
-     * @param g objeto Graphics utilizado para realizar el dibujo
-     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //if (player == null) return;
         Graphics2D g2d = (Graphics2D) g;
+
+        backgroundLoader.draw(g2d, getWidth(), getHeight(), this);
         drawMapElements(g2d);
         drawRemotePlayers(g2d);
         drawPlayer(g2d);
-
     }
-
-    /**
-     * Configura opciones de renderizado para mejorar la calidad del dibujo.
-     *
-     * @param g2d objeto Graphics2D usado para renderizar la imagen
-     */
-    private void aplicarCalidadRenderizado(Graphics2D g2d) {
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-    }
-
-
 
     private void drawMapElements(Graphics2D g2d) {
         GameMap gameMap = mapsHandler.readMaps().get(level-1);
+        for (Wall wall : gameMap.getWalls()) {
 
-//        System.out.println("Monedas: " + gameMap.getCoins().size());
-//        System.out.println("Visible: " + coinAnimator.isVisible());
-//        gameMap.getCoins().forEach(coin -> {
-//            System.out.println("Coin -> x=" + coin.getX() + " y=" + coin.getY()
-//                    + " w=" + coin.getWidth() + " h=" + coin.getHeight());
-//        });
+            if (wall.getTexturePath() != null) {
 
-        gameMap.getWalls().forEach(wall -> {
-            g2d.setColor(Color.BLACK);
-            g2d.fillRect(wall.getX(), wall.getY(), wall.getWidth(), wall.getHeight());
-        });
+                Image img = imageCache.computeIfAbsent(
+                        wall.getTexturePath(),
+                        path -> new ImageIcon(
+                                getClass().getResource("/images/" + path)
+                        ).getImage()
+                );
+
+                g2d.drawImage(
+                        img,
+                        wall.getX(),
+                        wall.getY(),
+                        wall.getWidth(),
+                        wall.getHeight(),
+                        null
+                );
+
+            } else {
+                g2d.setColor(Color.GRAY);
+                g2d.fillRect(
+                        wall.getX(),
+                        wall.getY(),
+                        wall.getWidth(),
+                        wall.getHeight()
+                );
+            }
+        }
 
         gameMap.getDoors().forEach(door -> {
-            g2d.setColor(Color.RED); // color de la puerta
-            g2d.fillRect(door.getX(), door.getY(), door.getWidth(), door.getHeight());
+
+            if (door.getTexturePath() != null) {
+
+                Image img = imageCache.computeIfAbsent(
+                        door.getTexturePath(),
+                        path -> new ImageIcon(
+                                getClass().getResource("/images/" + path)
+                        ).getImage()
+                );
+
+                g2d.drawImage(
+                        img,
+                        door.getX(),
+                        door.getY(),
+                        door.getWidth(),
+                        door.getHeight(),
+                        null
+                );
+
+            } else {
+                g2d.setColor(Color.RED);
+                g2d.fillRect(
+                        door.getX(),
+                        door.getY(),
+                        door.getWidth(),
+                        door.getHeight()
+                );
+            }
         });
 
-        if (coinAnimator.isVisible()) {
-            gameMap.getCoins().forEach(coin -> {
-                g2d.setColor(Color.PINK);
-                g2d.fillOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
-                g2d.setColor(Color.BLACK);
-                g2d.drawOval(coin.getX(), coin.getY(), coin.getWidth(), coin.getHeight());
-            });
-        }
+        // monedas
+        gameMap.getCoins().forEach(coin -> {
+            g2d.drawImage(
+                    coinImage,
+                    coin.getX(),
+                    coin.getY(),
+                    coin.getWidth(),
+                    coin.getHeight(),
+                    null
+            );
+        });
     }
 
     private void drawRemotePlayers(Graphics2D g2d) {
-        Random rand =  new Random();
+        Random rand = new Random();
+
         remotePlayers.forEach((id, pos) -> {
             g2d.setColor(new Color(
                     rand.nextInt(256),
@@ -172,33 +179,31 @@ public class Layout extends JPanel {
         });
     }
 
-    public void updRemotePlayers(Map<String, int[]>positions, String MyId) {
+    public void updRemotePlayers(Map<String, int[]> positions, String myId) {
         remotePlayers.clear();
-        positions.forEach((id,pos) -> {
-            if(!id.equals(MyId)){
-                remotePlayers.put(id,pos);
+
+        for (String id : positions.keySet()) {
+            if (!id.equals(myId)) {
+                remotePlayers.put(id, positions.get(id));
             }
-        });
+        }
+
         repaint();
         checkPlayerCollision();
     }
 
     private void drawPlayer(Graphics2D g2d){
-        Random rand = new Random();
-        g2d.setColor(new Color(
-                rand.nextInt(256),
-                rand.nextInt(256),
-                rand.nextInt(256)
-        ));
+        g2d.setColor(Color.BLUE);
         g2d.fillRect(player.getPosX(), player.getPosY(), player.getTamanio(), player.getTamanio());
     }
 
-    public void setLevel(int level){
+
+    public void setLevel(int level) {
         this.level = level;
+        backgroundLoader.load(level); // ✅ nuevo
         repaint();
         requestFocusInWindow();
     }
-
     public void startControlls(){
         addKeyListener(new KeyAdapter() {
             @Override
@@ -208,104 +213,79 @@ public class Layout extends JPanel {
                     case KeyEvent.VK_DOWN  -> moveDown();
                     case KeyEvent.VK_LEFT  -> moveLeft();
                     case KeyEvent.VK_RIGHT -> moveRight();
-
                 }
             }
         });
     }
-    private void moveUp(){
-        if(changeLevel) return;
-        int newY = this.player.getPosY() - 5;
-        if (!collision(this.player.getPosX(), newY)) {
-            this.player.setPosY(newY);
-            repaint();
-            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
-            checkCoinCollision();
-            checkDoorCollision();
-        }
-        else {
-            if (wallCollisionSound != null) wallCollisionSound.play();
-            spawnPlayer();
-        }
 
-    }
-    private void moveDown(){
+    public void move(int newX, int newY){
         if(changeLevel) return;
-        int newY = this.player.getPosY() + 5;
-        if (!collision(this.player.getPosX(), newY)) {
-            this.player.setPosY(newY);
-            repaint();
-            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
-            checkCoinCollision();
-            checkDoorCollision();
-        }
-        else {
-            if (wallCollisionSound != null) wallCollisionSound.play();
-            spawnPlayer();
-        }
-    }
-    private void moveLeft(){
-        if(changeLevel) return;
-        int newX = this.player.getPosX() - 5;
-        if (!collision(newX, this.player.getPosY())) {
-            this.player.setPosX(newX);
-            repaint();
-            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
-            checkCoinCollision();
-            checkDoorCollision();
-        }
-        else {
-            if (wallCollisionSound != null) wallCollisionSound.play();
-            spawnPlayer();
-        }
-    }
-    private void moveRight(){
-        if(changeLevel) return;
-        int newX = this.player.getPosX() + 5;
-        if (!collision(newX, this.player.getPosY())) {
-            this.player.setPosX(newX);
-            repaint();
-            if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
-            checkCoinCollision();
-            checkDoorCollision();
-        }
-        else {
-            if (wallCollisionSound != null) wallCollisionSound.play();
-            spawnPlayer();
-        }
-    }
 
-    private boolean collision(int newX, int newY){
-        GameMap gameMap = mapsHandler.readMaps().get(level-1);
-        for(Wall wall: gameMap.getWalls()){
-            boolean chocaX = newX < wall.getX() + wall.getWidth() && newX + player.getTamanio() > wall.getX();
-            boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
+        if (!collision(newX, newY)) {
 
-            if(chocaX && chocaY){
+            player.setPosX(newX);
+            player.setPosY(newY);
 
-                return true;
+            updateCoins();
+
+            if(onMove!=null) {
+                onMove.accept(player.getPosX(), player.getPosY());
             }
+
+            checkDoorCollision();
+
+            repaint();
         }
-        return false;
+        else {
+            if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
+            repaint();
+        }
     }
-    private void checkCoinCollision() {
+
+    private void moveUp(){ move(player.getPosX(), player.getPosY() - 5); }
+    private void moveDown(){ move(player.getPosX(), player.getPosY() + 5); }
+    private void moveLeft(){ move(player.getPosX() - 5, player.getPosY()); }
+    private void moveRight(){ move(player.getPosX() + 5, player.getPosY()); }
+
+    private void updateCoins() {
         GameMap gameMap = mapsHandler.readMaps().get(level - 1);
         int px = player.getPosX();
         int py = player.getPosY();
         int ps = player.getTamanio();
 
-        gameMap.getCoins().forEach(coin -> {
-            boolean solapaX = px < coin.getX() + coin.getWidth()  && px + ps > coin.getX();
+        for (int i = 0; i < gameMap.getCoins().size(); i++) {
+            Coin coin = gameMap.getCoins().get(i);
+
+            boolean solapaX = px < coin.getX() + coin.getWidth() && px + ps > coin.getX();
             boolean solapaY = py < coin.getY() + coin.getHeight() && py + ps > coin.getY();
 
             if (solapaX && solapaY) {
                 if (coinSound != null) coinSound.play();
+                gameMap.getCoins().remove(i);
+                //gameMap.addScore(coin.getPoints());
+                i--;
             }
-        });
+        }
+    }
+
+    private boolean collision(int newX, int newY){
+        GameMap gameMap = mapsHandler.readMaps().get(level-1);
+
+        for(Wall wall: gameMap.getWalls()){
+            boolean chocaX = newX < wall.getX() + wall.getWidth() && newX + player.getTamanio() > wall.getX();
+            boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
+
+            if(chocaX && chocaY){
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkDoorCollision() {
         GameMap gameMap = mapsHandler.readMaps().get(level - 1);
+
         int px = player.getPosX();
         int py = player.getPosY();
         int ps = player.getTamanio();
@@ -319,13 +299,10 @@ public class Layout extends JPanel {
                 .findFirst()
                 .ifPresent(door -> {
                     changeLevel = true;
-                    int totalLevels = mapsHandler.readMaps().size();
-                    if (level < totalLevels) {
-                        level++;
-                    } else {
-                        level = 1;
-                    }
 
+                    int totalLevels = mapsHandler.readMaps().size();
+                    level = (level < totalLevels) ? level + 1 : 1;
+                    setLevel(level);
                     spawnPlayer();
 
                     repaint();
@@ -337,23 +314,12 @@ public class Layout extends JPanel {
                 });
     }
 
-    /**
-     * Verifica si el jugador local colisiona con algún jugador remoto.
-     * Se llama desde {@link #updRemotePlayers} cada vez que llegan
-     * posiciones nuevas del servidor.
-     *
-     * <p>
-     * Usa el mismo algoritmo AABB que {@link #collision(int, int)} y
-     * {@link #checkCoinCollision()}, manteniendo consistencia en el proyecto.
-     * </p>
-     */
     private void checkPlayerCollision() {
         int px = player.getPosX();
         int py = player.getPosY();
         int ps = player.getTamanio();
 
         remotePlayers.forEach((id, pos) -> {
-            // pos[0] = x del jugador remoto, pos[1] = y del jugador remoto
             boolean solapaX = px < pos[0] + ps && px + ps > pos[0];
             boolean solapaY = py < pos[1] + ps && py + ps > pos[1];
 
@@ -363,17 +329,12 @@ public class Layout extends JPanel {
         });
     }
 
-    /**
-     * Metodo que asigna la posicion a un player segun el level en el que este
-     * evitando codesmell al repetir el seteo de posiciones en los diferentes metodos
-     */
     private void spawnPlayer(){
         int[] pos = SPAWN_POSITIONS.get(level);
+
         if(pos != null){
             player.setPosX(pos[0]);
             player.setPosY(pos[1]);
         }
     }
-
 }
-

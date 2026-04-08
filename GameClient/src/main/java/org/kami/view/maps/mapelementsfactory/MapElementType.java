@@ -4,5 +4,6 @@ public enum MapElementType {
     WALL,
     COIN,
     DOOR,
+    BACKGROUND,
 
 }

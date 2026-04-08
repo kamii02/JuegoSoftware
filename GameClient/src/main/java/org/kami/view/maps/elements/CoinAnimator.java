@@ -1,32 +1,32 @@
 package org.kami.view.maps.elements;
 
 public class CoinAnimator implements ICoinAnimator{
-    private volatile boolean visible = true;
-    private volatile boolean running = false;
+    private final int intervalMs;
+    private final Runnable task;
+    private volatile boolean running;
     private Thread thread;
-    private final int intervalMs; // cada cuánto parpadea
-    private Runnable onTick;
 
-    public CoinAnimator(int intervalMs, Runnable onTick) {
+    public CoinAnimator(int intervalMs, Runnable task) {
         this.intervalMs = intervalMs;
-        this.onTick = onTick;
+        this.task = task;
     }
 
     @Override
     public void start() {
         running = true;
+
         thread = new Thread(() -> {
             while (running) {
                 try {
-                    visible = !visible;
-                    onTick.run();
+                    task.run();
                     Thread.sleep(intervalMs);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
         });
-        thread.setDaemon(true); // muere cuando cierra la app
+
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -34,10 +34,5 @@ public class CoinAnimator implements ICoinAnimator{
     public void stop() {
         running = false;
         thread.interrupt();
-    }
-
-    @Override
-    public boolean isVisible() {
-        return visible;
     }
 }
