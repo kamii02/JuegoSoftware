@@ -9,17 +9,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.kami.audio.ISoundEffect;
+import org.kami.view.observer.CollisionManager;
+import org.kami.view.observer.ICollisionListener;
 
-public class Layout extends JPanel {
+public class Layout extends JPanel implements ICollisionListener {
 
     private Player player;
     private IMapsHandler mapsHandler;
@@ -42,6 +42,7 @@ public class Layout extends JPanel {
         this.level            = 1;
         this.mapsHandler      = mapsHandler;
         this.collisionManager = new CollisionManager(mapsHandler, player);
+        this.collisionManager.addListener(this);
         this.backgroundLoader = new BackgroundLoader(mapsHandler);
 
         setFocusable(true);
@@ -147,7 +148,6 @@ public class Layout extends JPanel {
     }
 
     private void drawRemotePlayers(Graphics2D g2d) {
-        Random rand = new Random();
 
         remotePlayers.forEach((id, pos) -> {
             if(pos[2] != level) return;
@@ -232,4 +232,21 @@ public class Layout extends JPanel {
             repaint();
         }
     }
+
+    @Override
+    public void onWallHit() {}
+
+    @Override
+    public void onCoinCollected() {}
+
+    @Override
+    public void onDoorEntered(int newLevel) {
+        setLevel(newLevel);
+        if(onMove != null)onMove.accept(new int[]{player.getPosX(), player.getPosY(), newLevel});
+        repaint();
+        requestFocusInWindow();
+    }
+
+    @Override
+    public void onPlayerCollision(String remoteId) {}
 }

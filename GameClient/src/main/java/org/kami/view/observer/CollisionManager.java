@@ -1,4 +1,4 @@
-package org.kami.view;
+package org.kami.view.observer;
 
 import org.kami.audio.ISoundEffect;
 import org.kami.config.element.Player;
@@ -8,6 +8,8 @@ import org.kami.view.maps.elements.GameMap;
 import org.kami.view.maps.elements.Wall;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,6 +17,7 @@ public class CollisionManager {
 
     private final IMapsHandler mapsHandler;
     private final Player player;
+    private final List<ICollisionListener> listener = new  ArrayList<>();
 
     private ISoundEffect coinSound;
     private ISoundEffect wallCollisionSound;
@@ -32,6 +35,11 @@ public class CollisionManager {
         this.mapsHandler = mapsHandler;
         this.player = player;
     }
+
+    public void addListener(ICollisionListener listener) {
+        this.listener.add(listener);
+    }
+    public void removeListener(ICollisionListener listener) {}
 
     public void setCoinSound(ISoundEffect coinSound) {
         this.coinSound = coinSound;
@@ -76,6 +84,7 @@ public class CollisionManager {
                 if (coinSound != null) coinSound.play();
                 gameMap.getCoins().remove(i);
                 i--;
+                listener.forEach(ICollisionListener::onCoinCollected);
             }
         }
     }
@@ -99,6 +108,7 @@ public class CollisionManager {
                     changeLevel = true;
                     int newLevel = (level < totalLevels) ? level + 1 : 1;
                     spawnPlayer(newLevel);
+                    listener.forEach(l ->l.onDoorEntered(newLevel));
                     onLevelChange.accept(newLevel);
                     onSpawn.run();
 
@@ -119,6 +129,7 @@ public class CollisionManager {
 
             if (solapaX && solapaY) {
                 if (playerCollisionSound != null) playerCollisionSound.play();
+                listener.forEach(l -> l.onPlayerCollision(id));
             }
         });
     }
@@ -133,5 +144,6 @@ public class CollisionManager {
 
     public void onWallHit() {
         if (wallCollisionSound != null) wallCollisionSound.play();
+        listener.forEach(ICollisionListener::onWallHit);
     }
 }

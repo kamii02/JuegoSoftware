@@ -3,19 +3,14 @@ package org.kami;
 import org.kami.client.SwingRenderer;
 import org.kami.config.*;
 import org.kami.config.element.Player;
-import org.kami.client.AppConfig;
-import org.kami.client.ConsoleRenderer;
 import org.kami.client.NetworkManager;
 import org.kami.config.maps.IMapsHandler;
 import org.kami.config.maps.MapReader;
-import org.kami.factory.ImageBallCreator;
 import org.kami.view.Layout;
 import org.kami.view.MainWindow;
-import org.kami.view.maps.elements.GameMap;
 import org.kami.audio.IMusicPlayer;
 import org.kami.audio.MusicPlayer;
 
-import java.util.List;
 import org.kami.audio.ISoundEffect;
 import org.kami.audio.SoundEffect;
 
