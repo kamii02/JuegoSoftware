@@ -136,8 +136,14 @@ public class Layout extends JPanel implements ICollisionListener {
 
         // monedas
         gameMap.getCoins().forEach(coin -> {
+            Image img = imageCache.computeIfAbsent(
+                    coin.getTexturePath(),
+                    path -> new ImageIcon(
+                            getClass().getResource("/images/" + path)
+                    ).getImage()
+            );
             g2d.drawImage(
-                    coinImage,
+                    img,
                     coin.getX(),
                     coin.getY(),
                     coin.getWidth(),
