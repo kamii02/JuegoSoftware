@@ -31,7 +31,13 @@ public class Layout extends JPanel {
     private ISoundEffect coinSound;
     private ISoundEffect wallCollisionSound;
     private ISoundEffect playerCollisionSound;
-
+    private boolean changeLevel = false;
+    private static final Map<Integer, int[]> SPAWN_POSITIONS = Map.of(
+            1, new int[]{100,700},
+            2, new int[]{600,740},
+            3, new int[]{220,740},
+            4, new int[]{50,740}
+    );
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player){
         setFocusable(true);
@@ -125,12 +131,12 @@ public class Layout extends JPanel {
     private void drawMapElements(Graphics2D g2d) {
         GameMap gameMap = mapsHandler.readMaps().get(level-1);
 
-        System.out.println("Monedas: " + gameMap.getCoins().size());
-        System.out.println("Visible: " + coinAnimator.isVisible());
-        gameMap.getCoins().forEach(coin -> {
-            System.out.println("Coin -> x=" + coin.getX() + " y=" + coin.getY()
-                    + " w=" + coin.getWidth() + " h=" + coin.getHeight());
-        });
+//        System.out.println("Monedas: " + gameMap.getCoins().size());
+//        System.out.println("Visible: " + coinAnimator.isVisible());
+//        gameMap.getCoins().forEach(coin -> {
+//            System.out.println("Coin -> x=" + coin.getX() + " y=" + coin.getY()
+//                    + " w=" + coin.getWidth() + " h=" + coin.getHeight());
+//        });
 
         gameMap.getWalls().forEach(wall -> {
             g2d.setColor(Color.BLACK);
@@ -190,6 +196,7 @@ public class Layout extends JPanel {
     public void setLevel(int level){
         this.level = level;
         repaint();
+        requestFocusInWindow();
     }
 
     public void startControlls(){
@@ -207,6 +214,7 @@ public class Layout extends JPanel {
         });
     }
     private void moveUp(){
+        if(changeLevel) return;
         int newY = this.player.getPosY() - 5;
         if (!collision(this.player.getPosX(), newY)) {
             this.player.setPosY(newY);
@@ -217,43 +225,53 @@ public class Layout extends JPanel {
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
 
     }
     private void moveDown(){
+        if(changeLevel) return;
         int newY = this.player.getPosY() + 5;
         if (!collision(this.player.getPosX(), newY)) {
             this.player.setPosY(newY);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
             checkCoinCollision();
+            checkDoorCollision();
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
     }
     private void moveLeft(){
+        if(changeLevel) return;
         int newX = this.player.getPosX() - 5;
         if (!collision(newX, this.player.getPosY())) {
             this.player.setPosX(newX);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
             checkCoinCollision();
+            checkDoorCollision();
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
     }
     private void moveRight(){
+        if(changeLevel) return;
         int newX = this.player.getPosX() + 5;
         if (!collision(newX, this.player.getPosY())) {
             this.player.setPosX(newX);
             repaint();
             if(onMove!=null) onMove.accept(player.getPosX(), player.getPosY());
             checkCoinCollision();
+            checkDoorCollision();
         }
         else {
             if (wallCollisionSound != null) wallCollisionSound.play();
+            spawnPlayer();
         }
     }
 
@@ -264,6 +282,7 @@ public class Layout extends JPanel {
             boolean chocaY = newY < wall.getY() + wall.getHeight() && newY + player.getTamanio() > wall.getY();
 
             if(chocaX && chocaY){
+
                 return true;
             }
         }
@@ -291,29 +310,32 @@ public class Layout extends JPanel {
         int py = player.getPosY();
         int ps = player.getTamanio();
 
-        for (var door : gameMap.getDoors()) {
-            boolean solapaX = px < door.getX() + door.getWidth() && px + ps > door.getX();
-            boolean solapaY = py < door.getY() + door.getHeight() && py + ps > door.getY();
+        gameMap.getDoors().stream()
+                .filter(door -> {
+                    boolean solapaX = px < door.getX() + door.getWidth() && px + ps > door.getX();
+                    boolean solapaY = py < door.getY() + door.getHeight() && py + ps > door.getY();
+                    return solapaX && solapaY;
+                })
+                .findFirst()
+                .ifPresent(door -> {
+                    changeLevel = true;
+                    int totalLevels = mapsHandler.readMaps().size();
+                    if (level < totalLevels) {
+                        level++;
+                    } else {
+                        level = 1;
+                    }
 
-            if (solapaX && solapaY) {
-                int totalLevels = mapsHandler.readMaps().size();
-                if (level < totalLevels) {
-                    level++; // siguiente nivel
-                } else {
-                    level = 1; // reinicia si es el último mapa
-                }
+                    spawnPlayer();
 
-                // Posición inicial segura en el nuevo mapa (ajusta si quieres otra)
-                player.setPosX(100);
-                player.setPosY(700);
+                    repaint();
+                    requestFocusInWindow();
 
-                repaint(); // redibuja el nuevo nivel
-                break; // no necesitamos seguir revisando
-            }
-        }
+                    Timer t = new Timer(200, e -> changeLevel = false);
+                    t.setRepeats(false);
+                    t.start();
+                });
     }
-
-
 
     /**
      * Verifica si el jugador local colisiona con algún jugador remoto.
@@ -339,6 +361,18 @@ public class Layout extends JPanel {
                 if (playerCollisionSound != null) playerCollisionSound.play();
             }
         });
+    }
+
+    /**
+     * Metodo que asigna la posicion a un player segun el level en el que este
+     * evitando codesmell al repetir el seteo de posiciones en los diferentes metodos
+     */
+    private void spawnPlayer(){
+        int[] pos = SPAWN_POSITIONS.get(level);
+        if(pos != null){
+            player.setPosX(pos[0]);
+            player.setPosY(pos[1]);
+        }
     }
 
 }
