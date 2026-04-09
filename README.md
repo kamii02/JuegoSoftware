@@ -4,6 +4,19 @@ Un juego de carreras de laberintos en tiempo real para **dos jugadores** que se 
 
 ---
 
+# REGLAS DEL JUEGO:
+1. Deben haber mínimo 4 jugadores para iniciar la partida.
+2. aparecerán monedas de forma aleatoria en cada mapa las cuales darán “puntos de
+combate” al jugador que coja la moneda
+3. Para avanzar de mapa, el jugador deberá llegar al portal
+4. el jugador que pase el último mapa de primero será el ganador
+5. los puntos de combate servirán para tirar habilidades que darán “ventajas” al jugador
+que las utilice
+6. si un jugador cae en una trampa del mapa, tendrá que volver al inicio del mapa en el
+que está
+
+---
+
 ## 📋 Tabla de Contenidos
 
 - [Descripción del juego](#-descripción-del-juego)
