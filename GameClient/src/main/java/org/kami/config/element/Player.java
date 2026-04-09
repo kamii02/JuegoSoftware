@@ -9,6 +9,7 @@ public class Player {
     private int posX;
     private int posY;
     private final int tamanio;
+    private int score;
     //private final Image imagen;
 
 
@@ -16,6 +17,7 @@ public class Player {
         this.posX = posX;
         this.posY = posY;
         this.tamanio = tamanio;
+        this.score = 0;
 
     }
 

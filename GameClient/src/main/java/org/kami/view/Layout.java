@@ -68,6 +68,7 @@ public class Layout extends JPanel implements ICollisionListener {
         drawMapElements(g2d);
         drawRemotePlayers(g2d);
         drawPlayer(g2d);
+        drawHUD(g2d);
     }
 
     private void drawMapElements(Graphics2D g2d) {
@@ -184,6 +185,12 @@ public class Layout extends JPanel implements ICollisionListener {
     private void drawPlayer(Graphics2D g2d){
         g2d.setColor(Color.BLUE);
         g2d.fillRect(player.getPosX(), player.getPosY(), player.getTamanio(), player.getTamanio());
+    }
+
+    private void drawHUD(Graphics2D g2d) {
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 20));
+        g2d.drawString("Score: " + player.getScore(), 650, 40);
     }
 
 
