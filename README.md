@@ -83,6 +83,7 @@ IMapElement element = factory.createMapElement(MapElementType.WALL);
 
 ## Estructura del Proyecto (Juego Multijugador en Tiempo Real por UDP)
 
+```
 JuegoSoftware/
 ├── GameClient/                          # Módulo del cliente (interfaz gráfica + red)
 │   ├── pom.xml
@@ -162,7 +163,7 @@ JuegoSoftware/
 ├── IGameRenderer.java
 ├── INetworkConnection.java
 └── IStateListener.java
-
+```
 ---
 
 ## ✅ Requisitos
