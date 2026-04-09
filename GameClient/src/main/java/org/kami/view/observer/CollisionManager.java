@@ -82,6 +82,7 @@ public class CollisionManager {
 
             if (solapaX && solapaY) {
                 if (coinSound != null) coinSound.play();
+                player.setScore(player.getScore() + coin.getPoints());
                 gameMap.getCoins().remove(i);
                 i--;
                 listener.forEach(ICollisionListener::onCoinCollected);

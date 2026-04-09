@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class MapReader implements IMapsHandler {
 
     private ILayoutConfig layoutConfig;
+    private List<GameMap> cachedMaps = null;
 
     public MapReader(ILayoutConfig layoutConfig){
         this.layoutConfig = layoutConfig;
@@ -73,6 +74,7 @@ public class MapReader implements IMapsHandler {
 
     @Override
     public List<GameMap> readMaps() {
+        if(cachedMaps != null) return cachedMaps;
         List<GameMap> loadedMaps = null;
 
         try {
@@ -101,6 +103,7 @@ public class MapReader implements IMapsHandler {
             System.out.println("Error leyendo carpeta de mapas");
         }
 
-        return loadedMaps;
+        cachedMaps = loadedMaps;
+        return cachedMaps;
     }
 }
