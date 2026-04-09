@@ -1,73 +1,42 @@
 package org.kami;
 
-import org.kami.client.SwingRenderer;
-import org.kami.config.*;
-import org.kami.config.element.Player;
-import org.kami.client.NetworkManager;
-import org.kami.config.maps.IMapsHandler;
-import org.kami.config.maps.MapReader;
-import org.kami.view.Layout;
-import org.kami.view.MainWindow;
-import org.kami.audio.IMusicPlayer;
-import org.kami.audio.MusicPlayer;
+import org.kami.ViewSwing.Zupi;
 
-import org.kami.audio.ISoundEffect;
-import org.kami.audio.SoundEffect;
+import javax.swing.*;
 
+/**
+ * Clase principal de la aplicación.
+ *
+ * Se encarga de iniciar la ejecución del programa mostrando
+ * la interfaz gráfica inicial del juego. Esta interfaz permite
+ * al usuario ingresar su nombre antes de comenzar la partida.
+ *
+ * Utiliza el hilo de eventos de Swing para garantizar que la
+ * interfaz gráfica se ejecute de manera segura.
+ *
+ * @author Camila Prada
+ * @version 1.0.0
+ */
 public class Main {
+
+    /**
+     * Método principal que inicia la aplicación.
+     *
+     * Crea la ventana principal y carga el panel de la interfaz
+     * inicial del juego. Configura el tamaño, posición y comportamiento
+     * de cierre de la ventana.
+     *
+     * @param args Argumentos de línea de comandos (no utilizados).
+     * @throws Exception Excepción general en caso de errores durante la ejecución.
+     */
     public static void main(String[] args) throws Exception {
-        IConfigReader reader = new PropertiesManager("application.properties");
-        ILayoutConfig layoutConfig = new LayoutConfig(reader);
-
-
-// ─── MÚSICA GLOBAL ──────────────────────────────────────────────────
-        // Leemos la ruta del .wav desde application.properties (clave "music.path").
-        // Usamos IConfigReader (ya instanciado arriba) para mantener el patrón:
-        // toda la configuración pasa por la misma abstracción.
-        String musicPath = reader.getString("music.path");
-
-        // Creamos el reproductor a través de la interfaz IMusicPlayer,
-        // exactamente igual que el resto del proyecto (ILayoutConfig, INetworkConnection…).
-        IMusicPlayer musicPlayer = new MusicPlayer(musicPath);
-
-        // Iniciamos la música antes de mostrar la ventana.
-        // A partir de aquí suena en bucle continuo en un hilo daemon de Java Sound.
-        musicPlayer.play();
-
-
-        ISoundEffect coinSound            = new SoundEffect(reader.getString("sound.coin"));
-        ISoundEffect wallCollisionSound   = new SoundEffect(reader.getString("sound.wall"));
-        ISoundEffect playerCollisionSound = new SoundEffect(reader.getString("sound.player"));
-
-
-        //Player player = creator.CharacterBuilder(800, 800);
-        //Maps config
-        IMapsHandler mapsHandler = new MapReader(layoutConfig);
-        Player player = new Player(100,700,30);
-        Layout l = new Layout(layoutConfig, mapsHandler, player);
-        MainWindow mainWindow = new MainWindow(l, layoutConfig);
-        mainWindow.setVisible(true);
-
-        /*Thread.sleep(5000);
-        l.setLevel(2);
-        Thread.sleep(5000);
-        l.setLevel(3);*/
-
-        // --- Arranque de red (3 líneas, nunca más) ---
-        IConfigReader  configReader    = new PropertiesManager("application.properties");
-        IUDPConfig     config          = new UDPConfig(configReader);
-        NetworkManager network         = new NetworkManager(config, new SwingRenderer(l, config.getPlayerId()));
-
-        network.connect();
-
-        //Conectamos la logica independiente que conecta el movimiento con la red
-        l.setOnMove(data -> network.sendPosition(data[0], data[1], data[2]));
-        l.setCoinSound(coinSound);
-        l.setWallCollisionSound(wallCollisionSound);
-        l.setPlayerCollisionSound(playerCollisionSound);
-
-        // Cuando el juego cierre:
-        //network.disconnect();
-
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("ZUPI");
+            frame.setContentPane(new Zupi().getPanel());
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(800, 800);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 }
