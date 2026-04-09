@@ -39,7 +39,7 @@ El proyecto está dividido en dos módulos Maven independientes:
 
 ---
 
-## 🧩 Patrones de Diseño
+## 🧩 Patrón de Diseño
 
 Ambos patrones fueron implementados siguiendo exclusivamente las definiciones y estructuras de **[Refactoring Guru](https://refactoring.guru/design-patterns/)**.
 
@@ -60,24 +60,6 @@ IStateListener.onStateChanged(state)
 │
 ├──► SwingRenderer   → repinta la ventana Swing
 └──► ConsoleRenderer → imprime en consola (debug)
-
----
-
-### 🏭 Factory Method
-
-**Propósito**: Delegar la creación de elementos del mapa a una fábrica, de modo que el código que construye el laberinto no dependa de clases concretas.
-
-| Elemento              | Clase / Interfaz       | Rol                                                        |
-|-----------------------|------------------------|------------------------------------------------------------|
-| Interfaz de producto  | `IMapElement`          | Contrato común para todos los elementos del mapa           |
-| Productos concretos   | `Wall`, `Coin`, `Door` | Implementaciones concretas de cada elemento                |
-| Interfaz de fábrica   | `IMapElementFactory`   | Declara `createMapElement(MapElementType type)`            |
-| Fábrica concreta      | `MapElementFactory`    | Crea `Wall`, `Coin` o `Door` según el `MapElementType`     |
-
-```java
-// Uso en tiempo de construcción del mapa
-IMapElement element = factory.createMapElement(MapElementType.WALL);
-```
 
 ---
 
