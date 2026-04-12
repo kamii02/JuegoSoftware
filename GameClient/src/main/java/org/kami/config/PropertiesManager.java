@@ -49,20 +49,37 @@ public class PropertiesManager implements IConfigReader {
         }
     }
 
-
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * Convierte el valor asociado a la clave en un entero utilizando
+     * {@link Integer#parseInt(String)}.
+     * </p>
+     *
+     * @param key la clave de configuración
+     * @return el valor convertido a entero
+     * @throws NumberFormatException si el valor no es un entero válido
+     * @throws NullPointerException si la clave no existe
+     */
     @Override
     public int getInt(String key) {
         return Integer.parseInt(props.getProperty(key));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>
+     * Retorna el valor asociado a la clave sin transformación.
+     * </p>
+     *
+     * @param key la clave de configuración
+     * @return el valor en formato String o {@code null} si no existe
+     */
     @Override
     public String getString(String key) {
         return  props.getProperty(key);
-    }
-
-    @Override
-    public Boolean getBoolean (String key) {
-        return Boolean.parseBoolean(props.getProperty(key));
     }
 
 }
