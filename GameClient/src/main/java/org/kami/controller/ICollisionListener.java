@@ -1,4 +1,4 @@
-package org.kami.view.observer;
+package org.kami.controller;
 
 public interface ICollisionListener {
     void onWallHit();

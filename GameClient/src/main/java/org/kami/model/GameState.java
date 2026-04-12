@@ -1,4 +1,6 @@
-package org.kami.shared;
+package org.kami.model;
+
+import org.kami.shared.IStateListener;
 
 import java.util.ArrayList;
 import java.util.Collections;

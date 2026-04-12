@@ -1,6 +1,6 @@
-package org.kami.view.maps.elements;
+package org.kami.maps;
 
-import org.kami.config.maps.IMapsHandler;
+import org.kami.model.GameMap;
 
 import javax.swing.*;
 import java.awt.*;

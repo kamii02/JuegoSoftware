@@ -1,11 +1,11 @@
-package org.kami.view.observer;
+package org.kami.controller;
 
 import org.kami.audio.ISoundEffect;
-import org.kami.config.element.Player;
-import org.kami.config.maps.IMapsHandler;
-import org.kami.view.maps.elements.Coin;
-import org.kami.view.maps.elements.GameMap;
-import org.kami.view.maps.elements.Wall;
+import org.kami.model.Player;
+import org.kami.maps.IMapsHandler;
+import org.kami.model.Coin;
+import org.kami.model.GameMap;
+import org.kami.model.Wall;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class CollisionManager {
     public void addListener(ICollisionListener listener) {
         this.listener.add(listener);
     }
-    public void removeListener(ICollisionListener listener) {}
+    public void removeListener(ICollisionListener listener) {this.listener.remove(listener);}
 
     public void setCoinSound(ISoundEffect coinSound) {
         this.coinSound = coinSound;

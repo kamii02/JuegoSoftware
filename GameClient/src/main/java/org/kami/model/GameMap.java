@@ -1,4 +1,4 @@
-package org.kami.view.maps.elements;
+package org.kami.model;
 
 import java.util.List;
 

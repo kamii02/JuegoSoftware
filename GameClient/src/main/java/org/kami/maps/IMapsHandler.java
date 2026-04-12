@@ -1,6 +1,6 @@
-package org.kami.config.maps;
+package org.kami.maps;
 
-import org.kami.view.maps.elements.GameMap;
+import org.kami.model.GameMap;
 
 import java.util.List;
 

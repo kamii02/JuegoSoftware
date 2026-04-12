@@ -1,19 +1,20 @@
-package org.kami.view.maps.elements;
+package org.kami.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.kami.view.maps.mapelementsfactory.IMapElement;
+import org.kami.maps.ITexturedElement;
+import org.kami.maps.mapelementsfactory.IMapElement;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Wall implements IMapElement, ITexturedElement{
+public class Door implements IMapElement, ITexturedElement {
 
     private int x;
     private int y;
-    private int height;
     private int width;
+    private int height;
     private String texturePath;
 
     @Override

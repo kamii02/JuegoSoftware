@@ -1,4 +1,4 @@
-package org.kami.view.maps.elements;
+package org.kami.maps;
 
 public interface ICoinAnimator {
     void start();

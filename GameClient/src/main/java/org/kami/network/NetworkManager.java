@@ -1,9 +1,8 @@
-package org.kami.client;
+package org.kami.network;
 
 
 import org.kami.config.IUDPConfig;
-import org.kami.config.UDPConfig;
-import org.kami.shared.GameState;
+import org.kami.model.GameState;
 import org.kami.shared.IGameRenderer;
 
 /**

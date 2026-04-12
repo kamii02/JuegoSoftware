@@ -1,4 +1,4 @@
-package org.kami.client;
+package org.kami.network;
 
 
 import org.kami.shared.INetworkConnection;

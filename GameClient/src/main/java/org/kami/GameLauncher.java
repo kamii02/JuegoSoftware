@@ -1,11 +1,11 @@
 package org.kami;
 
-import org.kami.client.SwingRenderer;
+import org.kami.network.SwingRenderer;
 import org.kami.config.*;
-import org.kami.config.element.Player;
-import org.kami.client.NetworkManager;
-import org.kami.config.maps.IMapsHandler;
-import org.kami.config.maps.MapReader;
+import org.kami.model.Player;
+import org.kami.network.NetworkManager;
+import org.kami.maps.IMapsHandler;
+import org.kami.maps.MapReader;
 import org.kami.view.Layout;
 import org.kami.view.MainWindow;
 import org.kami.audio.*;

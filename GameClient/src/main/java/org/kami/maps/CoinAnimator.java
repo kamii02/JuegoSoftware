@@ -1,4 +1,4 @@
-package org.kami.view.maps.elements;
+package org.kami.maps;
 
 public class CoinAnimator implements ICoinAnimator{
     private final int intervalMs;

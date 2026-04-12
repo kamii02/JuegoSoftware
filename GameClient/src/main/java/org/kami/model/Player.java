@@ -1,8 +1,6 @@
-package org.kami.config.element;
+package org.kami.model;
 
 import lombok.Data;
-
-import java.awt.*;
 
 @Data
 public class Player {

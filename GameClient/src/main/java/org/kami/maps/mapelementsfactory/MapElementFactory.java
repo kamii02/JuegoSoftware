@@ -1,8 +1,8 @@
-package org.kami.view.maps.mapelementsfactory;
+package org.kami.maps.mapelementsfactory;
 
-import org.kami.view.maps.elements.Coin;
-import org.kami.view.maps.elements.Door;
-import org.kami.view.maps.elements.Wall;
+import org.kami.model.Coin;
+import org.kami.model.Door;
+import org.kami.model.Wall;
 
 import java.util.HashMap;
 import java.util.Map;

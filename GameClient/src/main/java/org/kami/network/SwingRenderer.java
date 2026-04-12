@@ -1,9 +1,9 @@
-package org.kami.client;
+package org.kami.network;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.kami.shared.GameState;
+import org.kami.model.GameState;
 import org.kami.shared.IGameRenderer;
 import org.kami.view.Layout;
 

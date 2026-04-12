@@ -1,9 +1,13 @@
 package org.kami.view;
 
-import org.kami.config.element.Player;
+import org.kami.maps.BackgroundLoader;
+import org.kami.maps.CoinAnimator;
+import org.kami.maps.IBackgroundLoader;
+import org.kami.model.GameMap;
+import org.kami.model.Player;
 import org.kami.config.ILayoutConfig;
-import org.kami.config.maps.IMapsHandler;
-import org.kami.view.maps.elements.*;
+import org.kami.maps.IMapsHandler;
+import org.kami.model.Wall;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.kami.audio.ISoundEffect;
-import org.kami.view.observer.CollisionManager;
-import org.kami.view.observer.ICollisionListener;
+import org.kami.controller.CollisionManager;
+import org.kami.controller.ICollisionListener;
 
 public class Layout extends JPanel implements ICollisionListener {
 

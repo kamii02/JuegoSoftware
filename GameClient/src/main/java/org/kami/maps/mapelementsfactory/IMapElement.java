@@ -1,4 +1,4 @@
-package org.kami.view.maps.mapelementsfactory;
+package org.kami.maps.mapelementsfactory;
 
 public interface IMapElement {
     int getX();

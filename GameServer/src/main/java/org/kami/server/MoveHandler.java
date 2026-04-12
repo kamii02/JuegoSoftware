@@ -19,7 +19,7 @@ public class MoveHandler implements IMessageHandler {
             int level       = Integer.parseInt(parts[4]);
 
             state.updatePosition(playerId, x, y, level);
-            broadcaster.broadcast(state.serialize());
+            broadcaster.broadcast(state.serialize());   
 
         } catch (Exception e) {
             System.out.println("[MoveHandler] Mensaje malformado: " + message);

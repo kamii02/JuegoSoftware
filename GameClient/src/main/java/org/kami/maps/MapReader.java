@@ -1,8 +1,11 @@
-package org.kami.config.maps;
+package org.kami.maps;
 
 import org.kami.config.ILayoutConfig;
-import org.kami.view.maps.elements.*;
-import org.kami.view.maps.mapelementsfactory.*;
+import org.kami.model.Coin;
+import org.kami.model.Door;
+import org.kami.model.GameMap;
+import org.kami.model.Wall;
+import org.kami.maps.mapelementsfactory.*;
 
 import java.io.*;
 import java.net.URI;
