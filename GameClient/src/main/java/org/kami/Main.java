@@ -1,6 +1,6 @@
 package org.kami;
 
-import org.kami.ViewSwing.Zupi;
+import org.kami.view.ViewSwing.Zupi;
 
 import javax.swing.*;
 

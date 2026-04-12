@@ -28,6 +28,7 @@ public class Layout extends JPanel implements ICollisionListener {
     private Player player;
     private IMapsHandler mapsHandler;
     private int level;
+    private boolean gameReady = false;
 
     private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
     private final Map<String, Image> imageCache = new HashMap<>();
@@ -37,8 +38,6 @@ public class Layout extends JPanel implements ICollisionListener {
     private final IBackgroundLoader backgroundLoader;
     private final CoinAnimator coinAnimator;
     private final CollisionManager collisionManager;
-
-    private Image coinImage;
 
 
     public Layout(ILayoutConfig config, IMapsHandler mapsHandler, Player player) {
@@ -59,7 +58,8 @@ public class Layout extends JPanel implements ICollisionListener {
         coinAnimator.start();
     }
 
-    public void setOnMove(Consumer<int[]> onMove)     {this.onMove = onMove;}
+    public void setGameReady(boolean gameReady)         {this.gameReady = gameReady;}
+    public void setOnMove(Consumer<int[]> onMove)       {this.onMove = onMove;}
     public void setCoinSound(ISoundEffect s)            {collisionManager.setCoinSound(s);}
     public void setWallCollisionSound(ISoundEffect s)   {collisionManager.setWallCollissionSound(s);}
     public void setPlayerCollisionSound(ISoundEffect s) {collisionManager.setPlayerCollissionSound(s);}
@@ -68,11 +68,25 @@ public class Layout extends JPanel implements ICollisionListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+        if(!gameReady) {
+            drawWaitingScreen(g2d);
+            return;
+        }
         backgroundLoader.draw(g2d, getWidth(), getHeight(), this);
         drawMapElements(g2d);
         drawRemotePlayers(g2d);
         drawPlayer(g2d);
         drawHUD(g2d);
+    }
+
+    private void drawWaitingScreen(Graphics2D g2d){
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0,0,getWidth(),getHeight());
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 30));
+        g2d.drawString("Esperando jugadores...", 220, 380);
+        g2d.setFont(new Font("Arial", Font.PLAIN, 18));
+        g2d.drawString("Se necesitan al menos 2 jugadores para empezar.", 230, 420);
     }
 
     private void drawMapElements(Graphics2D g2d) {
@@ -220,6 +234,7 @@ public class Layout extends JPanel implements ICollisionListener {
     }
 
     public void move(int newX, int newY) {
+        if (!gameReady) return;
         if (collisionManager.isChangeLevel()) return;
 
         if (!collisionManager.collidesWithWall(newX, newY, level)) {

@@ -1,6 +1,6 @@
-package org.kami.ViewSwing;
+package org.kami.view.ViewSwing;
 
-import org.kami.GameLauncher;
+import org.kami.controller.GameLauncher;
 
 import javax.swing.*;
 import java.awt.*;

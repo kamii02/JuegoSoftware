@@ -5,6 +5,8 @@ import org.kami.config.IUDPConfig;
 import org.kami.model.GameState;
 import org.kami.shared.IGameRenderer;
 
+import javax.swing.*;
+
 /**
  * S: única responsabilidad — ser la fachada de red para el Main.
  * Tu Main solo conoce esta clase. No sabe nada de UDP, sockets ni config.
@@ -14,6 +16,8 @@ import org.kami.shared.IGameRenderer;
  */
 public class NetworkManager {
 
+    private static final String READY_MESSAGE = "READY";
+    private Runnable onReady;
     private final UdpConnection connection;
     private final IGameRenderer renderer;
     private final String        playerId;
@@ -23,6 +27,8 @@ public class NetworkManager {
         this.renderer   = renderer;
         this.connection = new UdpConnection(config.getIp(), config.getPort());
     }
+
+    public void setOnReady(Runnable onReady) {this.onReady = onReady;}
 
     /** Conecta y arranca el hilo receptor. Llama esto al iniciar el juego. */
     public void connect() throws Exception {
@@ -47,19 +53,34 @@ public class NetworkManager {
 
     /** Hilo que escucha actualizaciones del servidor y renderiza */
     private void startListening() {
-        Thread listener = new Thread(() -> {
-            try {
-                while (true) {
-                    String raw         = connection.receive();
-                    GameState updated  = GameState.deserialize(raw);
-                    renderer.render(updated);
-                }
-            } catch (Exception e) {
-                System.out.println("[NetworkManager] Hilo receptor terminado: " + e.getMessage());
-            }
-        }, "udp-listener");
-
-        listener.setDaemon(true); // Se cierra solo cuando cierra el juego
+        Thread listener = new Thread(this::listenLoop, "udp-listener");
+        listener.setDaemon(true);
         listener.start();
+    }
+
+    private void listenLoop() {
+        try {
+            while (true) {
+                String raw = connection.receive();
+                handleMessage(raw);
+            }
+        } catch (Exception e) {
+            System.out.println("[NetworkManager] Hilo receptor terminado: " + e.getMessage());
+        }
+    }
+
+    private void handleMessage(String raw) {
+        if (READY_MESSAGE.equals(raw)) {
+            notifyReady();
+            return;
+        }
+        GameState updated = GameState.deserialize(raw);
+        renderer.render(updated);
+    }
+
+    private void notifyReady() {
+        if (onReady != null) {
+            SwingUtilities.invokeLater(onReady);
+        }
     }
 }

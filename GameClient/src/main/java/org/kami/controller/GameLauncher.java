@@ -1,4 +1,4 @@
-package org.kami;
+package org.kami.controller;
 
 import org.kami.network.SwingRenderer;
 import org.kami.config.*;
@@ -73,6 +73,10 @@ public class GameLauncher {
             );
 
             network.connect();
+            network.setOnReady(() ->{
+                l.setGameReady(true);
+                l.repaint();
+            });
 
             // Eventos
             l.setOnMove(data -> network.sendPosition(data[0], data[1], data[2]));
