@@ -21,6 +21,6 @@ WALL,80,530,40,40,brick.jpg
 WALL,30,600,40,40,brick.jpg
 DOOR,30,50,50,70,door1.png
 COIN,30,560,40,40,Coin.png
-COIN,30,140,40,40,Coin.png
+COIN,30,170,40,40,Coin.png
 COIN,740,530,40,40,Coin.png
 COIN,160,80,40,40,Coin.png

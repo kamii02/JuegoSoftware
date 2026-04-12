@@ -22,14 +22,6 @@ WALL,200,120,400,20,land.png
 WALL,240,80,40,40,land.png
 WALL,520,80,40,40,land.png
 COIN,60,660,40,40,coin.png
-COIN,200,660,40,40,coin.png
-COIN,420,660,40,40,coin.png
-COIN,100,420,40,40,coin.png
-COIN,260,420,40,40,coin.png
-COIN,420,420,40,40,coin.png
-COIN,100,180,40,40,coin.png
-COIN,260,180,40,40,coin.png
-COIN,420,180,40,40,coin.png
-COIN,260,80,40,40,coin.png
-COIN,520,80,40,40,coin.png
-COIN,380,300,40,40,coin.png
+COIN,750,50,40,40,coin.png
+COIN,750,605,40,40,coin.png
+COIN,80,420,40,40,coin.png
