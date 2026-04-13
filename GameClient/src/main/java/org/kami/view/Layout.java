@@ -29,6 +29,10 @@ public class Layout extends JPanel implements ICollisionListener {
     private IMapsHandler mapsHandler;
     private int level;
     private boolean gameReady = false;
+    private boolean gameOver = false;
+    private String winnerId = "";
+    private Map<String, Integer> finalScores = new HashMap<>();
+    private Runnable onWin;
 
     private final Map<String, int[]> remotePlayers = new ConcurrentHashMap<>();
     private final Map<String, Image> imageCache = new HashMap<>();
@@ -63,11 +67,16 @@ public class Layout extends JPanel implements ICollisionListener {
     public void setCoinSound(ISoundEffect s)            {collisionManager.setCoinSound(s);}
     public void setWallCollisionSound(ISoundEffect s)   {collisionManager.setWallCollissionSound(s);}
     public void setPlayerCollisionSound(ISoundEffect s) {collisionManager.setPlayerCollissionSound(s);}
+    public void setOnWin(Runnable onWin)                {this.onWin = onWin;}
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+        if(gameOver){
+            drawWinScreen(g2d);
+            return;
+        }
         if(!gameReady) {
             drawWaitingScreen(g2d);
             return;
@@ -87,6 +96,33 @@ public class Layout extends JPanel implements ICollisionListener {
         g2d.drawString("Esperando jugadores...", 220, 380);
         g2d.setFont(new Font("Arial", Font.PLAIN, 18));
         g2d.drawString("Se necesitan al menos 2 jugadores para empezar.", 230, 420);
+    }
+
+    public void showWinScreen(String winner, Map<String, Integer> scores) {
+        this.gameOver    = true;
+        this.winnerId    = winner;
+        this.finalScores = scores;
+        repaint();
+    }
+
+    private void drawWinScreen(Graphics2D g2d) {
+        g2d.setColor(new Color(0, 0, 0, 200));
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+
+        g2d.setColor(Color.YELLOW);
+        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+        g2d.drawString("WINNER: " + winnerId, 220, 200);
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 24));
+        g2d.drawString("Final Scores", 320, 280);
+
+        g2d.setFont(new Font("Arial", Font.PLAIN, 20));
+        int y = 320;
+        for (Map.Entry<String, Integer> entry : finalScores.entrySet()) {
+            g2d.drawString(entry.getKey() + ":  " + entry.getValue() + " pts", 280, y);
+            y += 35;
+        }
     }
 
     private void drawMapElements(Graphics2D g2d) {
@@ -234,7 +270,7 @@ public class Layout extends JPanel implements ICollisionListener {
     }
 
     public void move(int newX, int newY) {
-        if (!gameReady) return;
+        if (!gameReady || gameOver) return;
         if (collisionManager.isChangeLevel()) return;
 
         if (!collisionManager.collidesWithWall(newX, newY, level)) {
@@ -281,4 +317,9 @@ public class Layout extends JPanel implements ICollisionListener {
 
     @Override
     public void onPlayerCollision(String remoteId) {}
+
+    @Override
+    public void onGameWon() {
+        if(onWin != null) onWin.run();
+    }
 }

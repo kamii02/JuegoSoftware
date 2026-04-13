@@ -5,4 +5,5 @@ public interface ICollisionListener {
     void onCoinCollected();
     void onDoorEntered(int newLevel);
     void onPlayerCollision(String remoteId);
+    void onGameWon();
 }

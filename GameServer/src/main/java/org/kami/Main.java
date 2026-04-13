@@ -5,6 +5,7 @@ import org.kami.config.PropertiesManager;
 import org.kami.server.IMessageHandler;
 import org.kami.server.MoveHandler;
 import org.kami.server.UdpConnectionManager;
+import org.kami.server.winHandler;
 import org.kami.shared.GameState;
 
 import java.util.ArrayList;
@@ -19,7 +20,8 @@ public class Main {
         GameState state =  new GameState();
 
         List<IMessageHandler> handlers = List.of(
-          new MoveHandler()
+                new MoveHandler(),
+                new winHandler()
         );
 
         UdpConnectionManager manager = new UdpConnectionManager(port, state, handlers);

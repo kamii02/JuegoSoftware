@@ -10,6 +10,9 @@ import org.kami.view.Layout;
 import org.kami.view.MainWindow;
 import org.kami.audio.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Clase encargada de inicializar y lanzar el juego completo.
  *
@@ -79,6 +82,22 @@ public class GameLauncher {
             });
 
             // Eventos
+            l.setOnWin(() ->{
+                Map<String, Integer> scores = new LinkedHashMap<>();
+                scores.put(config.getPlayerId(), player.getScore());
+                network.sendWin(scores);
+            });
+
+            network.setOnWin(raw ->{
+                String[] parts  = raw.split(" ");
+                String winner   = parts[1];
+                Map<String, Integer> scores = new LinkedHashMap<>();
+                for (int i = 1; i + 1 < parts.length; i += 2) {
+                    scores.put(parts[i], Integer.parseInt(parts[i + 1]));
+                }
+                l.showWinScreen(winner, scores);
+            });
+
             l.setOnMove(data -> network.sendPosition(data[0], data[1], data[2]));
             l.setCoinSound(coinSound);
             l.setWallCollisionSound(wallCollisionSound);

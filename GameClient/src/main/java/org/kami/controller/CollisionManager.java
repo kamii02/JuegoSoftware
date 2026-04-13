@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class CollisionManager {
-
+    private static final int LAST_LEVEL = 4;
     private final IMapsHandler mapsHandler;
     private final Player player;
     private final List<ICollisionListener> listener = new  ArrayList<>();
@@ -94,6 +94,9 @@ public class CollisionManager {
                                    Consumer<Integer> onLevelChange,
                                    Runnable onSpawn) {
         GameMap gameMap = mapsHandler.readMaps().get(level - 1);
+
+        if(!gameMap.getCoins().isEmpty()) return;
+
         int px = player.getPosX();
         int py = player.getPosY();
         int ps = player.getTamanio();
@@ -107,11 +110,16 @@ public class CollisionManager {
                 .findFirst()
                 .ifPresent(door -> {
                     changeLevel = true;
-                    int newLevel = (level < totalLevels) ? level + 1 : 1;
-                    spawnPlayer(newLevel);
-                    listener.forEach(l ->l.onDoorEntered(newLevel));
-                    onLevelChange.accept(newLevel);
-                    onSpawn.run();
+
+                    if (level == LAST_LEVEL) {
+                        listener.forEach(ICollisionListener::onGameWon);
+                    } else {
+                        int newLevel = level + 1;
+                        spawnPlayer(newLevel);
+                        listener.forEach(l -> l.onDoorEntered(newLevel));
+                        onLevelChange.accept(newLevel);
+                        onSpawn.run();
+                    }
 
                     Timer t = new Timer(200, e -> changeLevel = false);
                     t.setRepeats(false);

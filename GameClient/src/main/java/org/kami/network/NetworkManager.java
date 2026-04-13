@@ -6,6 +6,8 @@ import org.kami.model.GameState;
 import org.kami.shared.IGameRenderer;
 
 import javax.swing.*;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * S: única responsabilidad — ser la fachada de red para el Main.
@@ -17,7 +19,9 @@ import javax.swing.*;
 public class NetworkManager {
 
     private static final String READY_MESSAGE = "READY";
+    private static final String WIN           = "WIN";
     private Runnable onReady;
+    private Consumer<String> onWin;
     private final UdpConnection connection;
     private final IGameRenderer renderer;
     private final String        playerId;
@@ -29,6 +33,8 @@ public class NetworkManager {
     }
 
     public void setOnReady(Runnable onReady) {this.onReady = onReady;}
+
+    public void setOnWin(Consumer<String> onWin) {this.onWin = onWin;}
 
     /** Conecta y arranca el hilo receptor. Llama esto al iniciar el juego. */
     public void connect() throws Exception {
@@ -49,6 +55,14 @@ public class NetworkManager {
     /** Cierra la conexión. Llama esto al salir del juego. */
     public void disconnect() {
         connection.disconnect();
+    }
+
+    public void sendWin(Map<String, Integer> scores){
+        StringBuilder sb = new StringBuilder(WIN);
+        scores.forEach((id,score) ->
+           sb.append(" ").append(id).append(" ").append(score)
+        );
+        connection.send(sb.toString());
     }
 
     /** Hilo que escucha actualizaciones del servidor y renderiza */
@@ -74,6 +88,10 @@ public class NetworkManager {
             notifyReady();
             return;
         }
+        if (raw.startsWith(WIN)){
+            notifyWin(raw);
+            return;
+        }
         GameState updated = GameState.deserialize(raw);
         renderer.render(updated);
     }
@@ -81,6 +99,12 @@ public class NetworkManager {
     private void notifyReady() {
         if (onReady != null) {
             SwingUtilities.invokeLater(onReady);
+        }
+    }
+
+    private void notifyWin(String raw){
+        if(onWin != null){
+            SwingUtilities.invokeLater(() -> onWin.accept(raw));
         }
     }
 }
