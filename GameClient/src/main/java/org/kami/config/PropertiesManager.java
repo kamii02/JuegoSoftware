@@ -18,8 +18,13 @@ import java.util.Properties;
  * </p>
  *
  * <p>
- * Si el archivo no se encuentra, se lanza una excepción en tiempo de ejecución.
- * Si ocurre un error al leer el archivo, se registra en consola.
+ * Si el archivo no se encuentra o ocurre un error al leerlo,
+ * se lanza una excepción en tiempo de ejecución.
+ * </p>
+ *
+ * <p>
+ * Implementa el patrón Singleton para asegurar una única instancia
+ * en toda la aplicación.
  * </p>
  *
  * @author Manuel
@@ -28,25 +33,51 @@ import java.util.Properties;
  */
 public class PropertiesManager implements IConfigReader {
     /**
-     * Objeto que almacena las propiedades cargadas desde el archivo.
+     * Constante que define el archivo de propiedades por defecto.
      */
-    Properties props =  new Properties();
+    private static final String DEFAULT_FILE = "application.properties";
 
     /**
-     * Constructor que carga el archivo de propiedades desde el classpath.
-     *
-     * @param propFile nombre del archivo de propiedades (por ejemplo, {@code application.properties}).
-     * @throws RuntimeException si el archivo no se encuentra en el classpath.
+     * Instancia única de {@code PropertiesManager} (patrón Singleton).
      */
-    public PropertiesManager(String propFile) {
-        try(InputStream input = getClass().getClassLoader().getResourceAsStream(propFile)) {
+    private static volatile PropertiesManager instance;
+
+    /**
+     * Objeto que almacena las propiedades cargadas desde el archivo.
+     */
+    private final Properties props =  new Properties();
+
+    /**
+     * Constructor privado que evita la creación directa de instancias.
+     *
+     * @param propFile nombre del archivo de propiedades (por ejemplo, {@code application.properties})
+     * @throws RuntimeException si el archivo no se encuentra o no puede leerse
+     */
+    private PropertiesManager(String propFile) {
+        try(InputStream input = getClass().getClassLoader().getResourceAsStream(propFile)){
             if(input == null){
-                throw new RuntimeException("Error: no se encontro el archivo");
+                throw new RuntimeException("Archivo no encontrado: " + propFile);
             }
             props.load(input);
         }catch (IOException e){
-            System.out.printf("Error critico al leer las propiedades:  "+ e.getMessage());
+            throw new RuntimeException("Error leyendo la configuracion: " + e.getMessage());
         }
+    }
+
+    /**
+     * Obtiene la instancia única de {@code PropertiesManager}.
+     *
+     * @return la instancia global del gestor de propiedades
+     */
+    public static PropertiesManager getInstance(){
+        if(instance == null){
+            synchronized (PropertiesManager.class){
+                if(instance == null){
+                    instance = new PropertiesManager(DEFAULT_FILE);
+                }
+            }
+        }
+        return instance;
     }
 
     /**

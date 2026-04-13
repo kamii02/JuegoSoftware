@@ -15,11 +15,23 @@ import java.util.stream.Collectors;
 
 public class MapReader implements IMapsHandler {
 
+    private static volatile MapReader instance;
     private ILayoutConfig layoutConfig;
     private List<GameMap> cachedMaps = null;
 
-    public MapReader(ILayoutConfig layoutConfig){
+    private MapReader(ILayoutConfig layoutConfig) {
         this.layoutConfig = layoutConfig;
+    }
+
+    public static MapReader getInstance(ILayoutConfig layoutConfig) {
+        if(instance == null){
+            synchronized (MapReader.class){
+                if(instance == null){
+                    instance = new MapReader(layoutConfig);
+                }
+            }
+        }
+        return instance;
     }
 
     private GameMap readMap(String path) {

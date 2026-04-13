@@ -40,7 +40,7 @@ public class GameLauncher {
      */
     public static void startGame(String playerName) {
         try {
-            IConfigReader reader = new PropertiesManager("application.properties");
+            IConfigReader reader = PropertiesManager.getInstance();
             ILayoutConfig layoutConfig = new LayoutConfig(reader);
 
             // Música
@@ -54,7 +54,7 @@ public class GameLauncher {
             ISoundEffect playerCollisionSound = new SoundEffect(reader.getString("sound.player"));
 
             // Mapa y jugador
-            IMapsHandler mapsHandler = new MapReader(layoutConfig);
+            IMapsHandler mapsHandler = MapReader.getInstance(layoutConfig);
             Player player = new Player(100,700,30);
 
             Layout l = new Layout(layoutConfig, mapsHandler, player);
@@ -62,7 +62,7 @@ public class GameLauncher {
             mainWindow.setVisible(true);
 
             // Red
-            IConfigReader configReader = new PropertiesManager("application.properties");
+            IConfigReader configReader = PropertiesManager.getInstance();
             UDPConfig config = new UDPConfig(configReader);
 
             config.setPlayerId(playerName);
