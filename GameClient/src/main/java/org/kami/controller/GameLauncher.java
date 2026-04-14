@@ -82,23 +82,11 @@ public class GameLauncher {
             });
 
             // Eventos
-            l.setOnWin(() ->{
-                Map<String, Integer> scores = new LinkedHashMap<>();
-                scores.put(config.getPlayerId(), player.getScore());
-                network.sendWin(scores);
-            });
-
-            network.setOnWin(raw ->{
-                String[] parts  = raw.split(" ");
-                String winner   = parts[1];
-                Map<String, Integer> scores = new LinkedHashMap<>();
-                for (int i = 1; i + 1 < parts.length; i += 2) {
-                    scores.put(parts[i], Integer.parseInt(parts[i + 1]));
-                }
-                l.showWinScreen(winner, scores);
-            });
-
-            l.setOnMove(data -> network.sendPosition(data[0], data[1], data[2]));
+            l.setOnWin(()->network.sendWin());
+            network.setOnWin(raw ->
+                l.showWinScreen(raw)
+            );
+            l.setOnMove(data -> network.sendPosition(data[0], data[1], data[2], player.getScore()));
             l.setCoinSound(coinSound);
             l.setWallCollisionSound(wallCollisionSound);
             l.setPlayerCollisionSound(playerCollisionSound);

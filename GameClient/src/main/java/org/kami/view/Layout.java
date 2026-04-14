@@ -4,6 +4,7 @@ import org.kami.maps.BackgroundLoader;
 import org.kami.maps.CoinAnimator;
 import org.kami.maps.IBackgroundLoader;
 import org.kami.model.GameMap;
+import org.kami.model.GameState;
 import org.kami.model.Player;
 import org.kami.config.ILayoutConfig;
 import org.kami.maps.IMapsHandler;
@@ -14,6 +15,7 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,11 +100,19 @@ public class Layout extends JPanel implements ICollisionListener {
         g2d.drawString("Se necesitan al menos 2 jugadores para empezar.", 230, 420);
     }
 
-    public void showWinScreen(String winner, Map<String, Integer> scores) {
-        this.gameOver    = true;
-        this.winnerId    = winner;
-        this.finalScores = scores;
+    public void showWinScreen(String raw) {
+        String[] parts     = raw.split(" ",3);
+        this.winnerId      = parts[1];
+        this.finalScores   = parseScores(parts[2]);
+        this.gameOver      = true;
         repaint();
+    }
+
+    private Map<String, Integer> parseScores(String stateRaw) {
+        Map<String, Integer> scores = new LinkedHashMap<>();
+        GameState state = GameState.deserialize(stateRaw);
+        state.getPositions().forEach((id, pos) -> scores.put(id, pos[3]));
+        return scores;
     }
 
     private void drawWinScreen(Graphics2D g2d) {
@@ -233,7 +243,6 @@ public class Layout extends JPanel implements ICollisionListener {
         }
 
         repaint();
-        collisionManager.checkPlayerCollision(remotePlayers);
     }
 
     private void drawPlayer(Graphics2D g2d){
@@ -279,7 +288,7 @@ public class Layout extends JPanel implements ICollisionListener {
 
             collisionManager.checkCoinCollision(level);
 
-            if (onMove != null) onMove.accept(new int[]{player.getPosX(), player.getPosY(), level});
+            if (onMove != null) onMove.accept(new int[]{player.getPosX(), player.getPosY(), level, player.getScore()});
 
             collisionManager.checkDoorCollision(
                     level,
@@ -310,13 +319,10 @@ public class Layout extends JPanel implements ICollisionListener {
     @Override
     public void onDoorEntered(int newLevel) {
         setLevel(newLevel);
-        if(onMove != null)onMove.accept(new int[]{player.getPosX(), player.getPosY(), newLevel});
+        if(onMove != null)onMove.accept(new int[]{player.getPosX(), player.getPosY(), newLevel, player.getScore()});
         repaint();
         requestFocusInWindow();
     }
-
-    @Override
-    public void onPlayerCollision(String remoteId) {}
 
     @Override
     public void onGameWon() {

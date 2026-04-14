@@ -127,22 +127,6 @@ public class CollisionManager {
                 });
     }
 
-    public void checkPlayerCollision(Map<String, int[]> remotePlayers) {
-        int px = player.getPosX();
-        int py = player.getPosY();
-        int ps = player.getTamanio();
-
-        remotePlayers.forEach((id, pos) -> {
-            boolean solapaX = px < pos[0] + ps && px + ps > pos[0];
-            boolean solapaY = py < pos[1] + ps && py + ps > pos[1];
-
-            if (solapaX && solapaY) {
-                if (playerCollisionSound != null) playerCollisionSound.play();
-                listener.forEach(l -> l.onPlayerCollision(id));
-            }
-        });
-    }
-
     public void spawnPlayer(int level) {
         int[] pos = SPAWN_POSITIONS.get(level);
         if (pos != null) {

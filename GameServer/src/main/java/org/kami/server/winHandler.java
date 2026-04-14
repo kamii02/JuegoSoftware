@@ -13,6 +13,7 @@ public class winHandler implements IMessageHandler{
 
     @Override
     public void handle(String message, GameState state, UdpBroadcaster broadcaster) {
-        broadcaster.broadcast(message);
+        String winnerId = message.split(" ")[1];
+        broadcaster.broadcast("WIN " +  winnerId + " " + state.serialize());
     }
 }

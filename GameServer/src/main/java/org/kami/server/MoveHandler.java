@@ -10,15 +10,16 @@ public class MoveHandler implements IMessageHandler {
 
     @Override
     public void handle(String message, GameState state, UdpBroadcaster broadcaster) {
-        // Formato esperado: "MOVE PLAYER_1 120 340"
+        // Formato esperado: "MOVE name x y level score"
         try {
             String[] parts  = message.split(" ");
             String playerId = parts[1];
             int x           = Integer.parseInt(parts[2]);
             int y           = Integer.parseInt(parts[3]);
             int level       = Integer.parseInt(parts[4]);
+            int score       = Integer.parseInt(parts[5]);
 
-            state.updatePosition(playerId, x, y, level);
+            state.updatePosition(playerId, x, y, level, score);
             broadcaster.broadcast(state.serialize());   
 
         } catch (Exception e) {
