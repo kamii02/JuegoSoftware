@@ -13,16 +13,49 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación de {@link IMapsHandler} encargada de leer y construir
+ * los mapas del juego a partir de archivos CSV.
+ * <p>
+ * Esta clase utiliza el patrón Singleton para garantizar una única instancia,
+ * y mantiene una caché de los mapas ya cargados para evitar lecturas repetidas.
+ * </p>
+ */
 public class MapReader implements IMapsHandler {
 
+    /**
+     * Instancia única de la clase (Singleton).
+     */
     private static volatile MapReader instance;
+
+    /**
+     * Configuración de layout que proporciona la ruta de los mapas.
+     */
     private ILayoutConfig layoutConfig;
+
+    /**
+     * Caché de mapas ya cargados.
+     */
     private List<GameMap> cachedMaps = null;
 
+    /**
+     * Constructor privado para el patrón Singleton.
+     *
+     * @param layoutConfig configuración del layout
+     */
     private MapReader(ILayoutConfig layoutConfig) {
         this.layoutConfig = layoutConfig;
     }
 
+    /**
+     * Obtiene la instancia única de {@link MapReader}.
+     * <p>
+     * Implementa inicialización perezosa con doble verificación (double-checked locking).
+     * </p>
+     *
+     * @param layoutConfig configuración del layout
+     * @return instancia única de {@link MapReader}
+     */
     public static MapReader getInstance(ILayoutConfig layoutConfig) {
         if(instance == null){
             synchronized (MapReader.class){
@@ -34,6 +67,12 @@ public class MapReader implements IMapsHandler {
         return instance;
     }
 
+    /**
+     * Lee un archivo CSV y construye un {@link GameMap}.
+     *
+     * @param path ruta del archivo dentro del classpath
+     * @return el mapa construido a partir del archivo
+     */
     private GameMap readMap(String path) {
         IMapElementFactory factory = new MapElementFactory();
         GameMap gameMap = new GameMap();
@@ -87,6 +126,15 @@ public class MapReader implements IMapsHandler {
         return gameMap;
     }
 
+    /**
+     * Lee todos los mapas disponibles desde la carpeta configurada.
+     * <p>
+     * Los mapas se cargan una sola vez y se almacenan en caché para
+     * futuras llamadas.
+     * </p>
+     *
+     * @return lista de {@link GameMap} ordenados por nombre de archivo
+     */
     @Override
     public List<GameMap> readMaps() {
         if(cachedMaps != null) return cachedMaps;
