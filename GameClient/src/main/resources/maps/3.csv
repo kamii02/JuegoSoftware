@@ -30,5 +30,13 @@ WALL,240,260,40,40,hellB.png
 WALL,620,160,40,40,hellB.png
 COIN,40,650,40,40,coin.png
 COIN,40,460,40,40,coin.png
+COIN,40,250,40,40,coin.png
+COIN,40,150,40,40,coin.png
+COIN,180,230,40,40,coin.png
 COIN,430,340,40,40,coin.png
+COIN,530,160,40,40,coin.png
 COIN,740,580,40,40,coin.png
+COIN,740,480,40,40,coin.png
+COIN,740,380,40,40,coin.png
+COIN,740,280,40,40,coin.png
+COIN,740,180,40,40,coin.png
