@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UdpBroadcaster {
+    private static final int MIN_PLAYERS_TO_START = 2;
+    private static final String READY_MESSAGE     = "READY";
     private final DatagramSocket socket;
     private final List<InetSocketAddress> clients = new ArrayList<>();
 
@@ -18,6 +20,9 @@ public class UdpBroadcaster {
         if (!clients.contains(address)) {
             clients.add(address);
             System.out.println("[Broadcaster] Cliente registrado: " + address);
+        }
+        if(isReadyToStart()){
+            broadcast(READY_MESSAGE);
         }
     }
 
@@ -40,5 +45,9 @@ public class UdpBroadcaster {
                 System.out.println("[Broadcaster] Error enviando a " + address + ": " + e.getMessage());
             }
         });
+    }
+
+    private boolean isReadyToStart() {
+        return clients.size() >= MIN_PLAYERS_TO_START;
     }
 }

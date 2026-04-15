@@ -1,0 +1,23 @@
+package org.kami.model;
+
+import lombok.Data;
+
+@Data
+public class Player {
+    private int posX;
+    private int posY;
+    private final int tamanio;
+    private int score;
+    //private final Image imagen;
+
+
+    public Player(int posX, int posY, int tamanio) {
+        this.posX = posX;
+        this.posY = posY;
+        this.tamanio = tamanio;
+        this.score = 0;
+
+    }
+
+
+}
